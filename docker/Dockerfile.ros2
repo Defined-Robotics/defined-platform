@@ -1,0 +1,33 @@
+# Defined Robotics — ROS2 Development Container
+# Based on ROS2 Humble for ARM64/AMD64
+FROM ros:humble-desktop
+
+# Install Nav2, Gazebo, rosbridge, and BehaviorTree.CPP
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ros-humble-navigation2 \
+    ros-humble-nav2-bringup \
+    ros-humble-gazebo-ros-pkgs \
+    ros-humble-rosbridge-suite \
+    ros-humble-behaviortree-cpp \
+    ros-humble-robot-state-publisher \
+    ros-humble-joint-state-publisher \
+    ros-humble-xacro \
+    ros-humble-tf2-ros \
+    ros-humble-tf2-tools \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create workspace
+WORKDIR /ros2_ws
+
+# Copy source packages
+COPY src/ /ros2_ws/src/
+
+# Build workspace
+RUN . /opt/ros/humble/setup.sh && \
+    colcon build --symlink-install
+
+# Entrypoint
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["bash"]

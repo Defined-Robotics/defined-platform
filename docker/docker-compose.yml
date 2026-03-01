@@ -1,0 +1,34 @@
+# Defined Robotics — Docker Compose for ROS2 simulation
+# Usage: docker compose up
+version: "3.8"
+
+services:
+  ros2:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.ros2
+    container_name: defined_ros2
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+      - ROS_DOMAIN_ID=0
+    ports:
+      - "9090:9090"   # rosbridge WebSocket
+      - "11311:11311" # ROS master (if needed)
+    volumes:
+      # Mount compiled BT XML from host
+      - ../../verb-compiler/build:/bt_xml:ro
+      # Mount source for development (rebuild not needed for config changes)
+      - ../src:/ros2_ws/src
+    networks:
+      - defined_net
+    command: >
+      bash -c "
+        ros2 launch rosbridge_server rosbridge_websocket_launch.xml &
+        sleep 2 &&
+        echo 'Defined Robotics ROS2 container ready. rosbridge on :9090' &&
+        wait
+      "
+
+networks:
+  defined_net:
+    driver: bridge
