@@ -1,33 +1,73 @@
 # Defined Robotics — ROS2 Development Container
 # Based on ROS2 Humble for ARM64/AMD64
-FROM ros:humble-desktop
+# Tag is multi-arch (AMD64 + ARM64). Docker selects the correct variant for the host.
+# To pin again: docker pull --platform linux/arm64 osrf/ros:humble-desktop-full
+#               docker image inspect --format '{{index .RepoDigests 0}}'
+FROM osrf/ros:humble-desktop-full
 
-# Install Nav2, Gazebo, rosbridge, and BehaviorTree.CPP
+# Install Nav2, Gazebo Classic, rosbridge, BehaviorTree.CPP, and tooling.
+#
+# Package notes:
+#   ros-humble-navigation2        : full Nav2 stack (planner, controller, amcl, bt_navigator, …)
+#   ros-humble-nav2-bringup       : nav2_bringup launch helpers
+#   ros-humble-nav2-common        : RewrittenYaml and other launch utilities (used in navigation.launch.py)
+#   gazebo11                      : Gazebo Classic physics engine binary
+#   ros-humble-gazebo-ros-pkgs    : gazebo_ros Python launch files + Gazebo ROS plugins
+#   ros-humble-gazebo-ros         : gzserver / gzclient launch files (subset of gazebo-ros-pkgs)
+#   ros-humble-rosbridge-suite    : WebSocket bridge for dashboard
+#   ros-humble-behaviortree-cpp   : BehaviorTree.CPP runtime (for defined_runtime)
+#   ros-humble-robot-state-publisher : publishes /robot_description + TF from URDF
+#   ros-humble-joint-state-publisher : publishes /joint_states for static joints
+#   ros-humble-xacro              : xacro macro processor (URDF → URDF)
+#   ros-humble-tf2-ros            : TF2 core
+#   ros-humble-tf2-tools          : tf2_echo, view_frames diagnostic utilities
+#   ros-humble-rviz2              : RViz2 visualiser (for the viz Docker profile)
+#   python3-colcon-common-extensions : colcon build tool
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-navigation2 \
     ros-humble-nav2-bringup \
+    ros-humble-slam-toolbox \
     ros-humble-gazebo-ros-pkgs \
     ros-humble-rosbridge-suite \
+    ros-humble-foxglove-bridge \
     ros-humble-behaviortree-cpp \
     ros-humble-robot-state-publisher \
     ros-humble-joint-state-publisher \
     ros-humble-xacro \
     ros-humble-tf2-ros \
     ros-humble-tf2-tools \
+    python3-colcon-common-extensions \
+    libgl1-mesa-dri \
     && rm -rf /var/lib/apt/lists/*
 
-# Create workspace
+# Create non-root user to run all ROS2 processes (C1)
+RUN groupadd -r ros && useradd -r -g ros -d /ros2_ws -s /bin/bash ros
+
+# Create workspace and hand ownership to ros user
+RUN mkdir -p /ros2_ws/src /ros2_ws/build /ros2_ws/install /ros2_ws/log \
+    && chown -R ros:ros /ros2_ws
 WORKDIR /ros2_ws
 
-# Copy source packages
+# Copy source packages (as root, then fix ownership)
 COPY src/ /ros2_ws/src/
+RUN chown -R ros:ros /ros2_ws/src
 
-# Build workspace
+# Build workspace as non-root user
+USER ros
 RUN . /opt/ros/humble/setup.sh && \
-    colcon build --symlink-install
+    colcon build --packages-ignore defined_runtime
 
-# Entrypoint
+# Entrypoint (needs root to copy, then switch back)
+USER root
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+
+# Drop back to non-root for runtime
+USER ros
+
+# Rosbridge process health: check the WebSocket port is open (W3)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD bash -c 'echo > /dev/tcp/localhost/9090' 2>/dev/null || exit 1
+
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["bash"]

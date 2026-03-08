@@ -1,33 +1,158 @@
-# Defined Robotics — Docker Compose for ROS2 simulation
-# Usage: docker compose up
-version: "3.8"
+# Defined Robotics — Docker Compose (simulation stack)
+# Usage: docker compose up  (from work/defined_platform/docker/)
+#
+# Services:
+#   sim        — Full simulation: Gazebo headless + Nav2 + rosbridge
+#   rviz       — RViz2 visualisation (optional, requires X11)
+#   sim-gui    — Simulation with Gazebo GUI enabled (optional, requires X11)
+#
+# With GUI on Linux (X11 Unix socket, grant access to this user only):
+#   xhost +si:localuser:$USER
+#   docker compose --profile viz up rviz
+#   docker compose --profile gui up sim-gui
+#   NOTE: on Linux also mount /tmp/.X11-unix:/tmp/.X11-unix in the service volumes
+#
+# With GUI on macOS (XQuartz listens on :1 / port 6001 natively — no socat needed):
+#   xhost +127.0.0.1
+#   DISPLAY=host.docker.internal:1 docker compose --profile viz up rviz
+#   DISPLAY=host.docker.internal:1 docker compose --profile gui up sim-gui
+#
+# NOTE: sim and sim-gui are mutually exclusive — both bind port 9090.
+#   Stop sim before starting sim-gui: docker compose down
+#
+# Environment variables (set in shell or a .env file):
+#   DISPLAY        — X11 display
+#   ROS_DOMAIN_ID  — ROS2 DDS domain (default 0)
+
 
 services:
-  ros2:
+
+  # ---------------------------------------------------------------------------
+  # sim: Full simulation stack
+  # Runs: Gazebo (headless) + Nav2 + rosbridge WebSocket
+  # ---------------------------------------------------------------------------
+  sim:
+    platform: linux/arm64
+    build:
+      context: ..                          # build context = work/defined_platform/
+      dockerfile: docker/Dockerfile.ros2
+    image: defined_robotics/sim:latest
+    container_name: defined_sim
+
+    environment:
+      # X11 display — needed only if use_gui:=true
+      - DISPLAY=${DISPLAY:-:0}
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-0}
+      # Help Gazebo find model SDF files installed by the package
+      - GAZEBO_MODEL_PATH=/ros2_ws/install/defined_gazebo/share/defined_gazebo/models
+
+    ports:
+      - "127.0.0.1:9090:9090"  # rosbridge WebSocket — localhost only (C3)
+      - "127.0.0.1:8765:8765"  # foxglove_bridge WebSocket — Foxglove Studio (C3)
+
+    volumes:
+      # Live source mount — YAML/param changes visible without image rebuild.
+      # C++ nodes still require colcon rebuild inside the container.
+      - ../src:/ros2_ws/src:ro
+      # Compiled BT XML produced by the verb-compiler on the host
+      - ../../verb-compiler/build:/bt_xml:ro
+      # Named volumes keep colcon artefacts between compose up/down cycles
+      - defined_build:/ros2_ws/build
+      - defined_install:/ros2_ws/install
+
+    networks:
+      - defined_net
+
+    # Security hardening (W5)
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+    # Default: headless (no Gazebo GUI), maze world.
+    # Override for GUI: docker compose run sim ros2 launch ... use_gui:=true
+    command: >
+      ros2 launch defined_bringup simulation.launch.py use_gui:=false
+
+  # ---------------------------------------------------------------------------
+  # rviz: Optional RViz2 visualisation
+  # Requires X11 forwarding on the host.
+  # Start with: docker compose --profile viz up rviz
+  # ---------------------------------------------------------------------------
+  rviz:
+    platform: linux/arm64
     build:
       context: ..
       dockerfile: docker/Dockerfile.ros2
-    container_name: defined_ros2
+    image: defined_robotics/sim:latest
+    container_name: defined_rviz
+    profiles:
+      - viz
     environment:
       - DISPLAY=${DISPLAY:-:0}
-      - ROS_DOMAIN_ID=0
-    ports:
-      - "9090:9090"   # rosbridge WebSocket
-      - "11311:11311" # ROS master (if needed)
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-0}
+      - LIBGL_ALWAYS_SOFTWARE=1
+      - OGRE_RTT_MODE=Copy          # prevents GLXContext failures over X11 forwarding
     volumes:
-      # Mount compiled BT XML from host
-      - ../../verb-compiler/build:/bt_xml:ro
-      # Mount source for development (rebuild not needed for config changes)
-      - ../src:/ros2_ws/src
+      - ../src:/ros2_ws/src:ro
+      - defined_install:/ros2_ws/install
     networks:
       - defined_net
+    depends_on:
+      - sim
     command: >
       bash -c "
-        ros2 launch rosbridge_server rosbridge_websocket_launch.xml &
-        sleep 2 &&
-        echo 'Defined Robotics ROS2 container ready. rosbridge on :9090' &&
-        wait
+        source /opt/ros/humble/setup.bash &&
+        if [ -f /ros2_ws/install/setup.bash ]; then source /ros2_ws/install/setup.bash; fi &&
+        rviz2
       "
+
+  # ---------------------------------------------------------------------------
+  # sim-gui: Simulation stack with Gazebo GUI enabled
+  # Requires X11 forwarding on the host.
+  # Start with: docker compose --profile gui up sim-gui
+  # On macOS: DISPLAY=host.docker.internal:1 docker compose --profile gui up sim-gui
+  # ---------------------------------------------------------------------------
+  sim-gui:
+    platform: linux/arm64
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.ros2
+    image: defined_robotics/sim:latest
+    container_name: defined_sim_gui
+    profiles:
+      - gui
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-0}
+      - GAZEBO_MODEL_PATH=/ros2_ws/install/defined_gazebo/share/defined_gazebo/models
+      - LIBGL_ALWAYS_SOFTWARE=1
+      - OGRE_RTT_MODE=Copy          # prevents GLXContext failures over X11 forwarding
+      - GALLIUM_DRIVER=softpipe     # more portable than llvmpipe on ARM64
+    ports:
+      - "127.0.0.1:9090:9090"  # rosbridge WebSocket — localhost only (C3)
+      - "127.0.0.1:8765:8765"  # foxglove_bridge WebSocket — Foxglove Studio (C3)
+    volumes:
+      - ../src:/ros2_ws/src:ro
+      - ../../verb-compiler/build:/bt_xml:ro
+      - defined_build:/ros2_ws/build
+      - defined_install:/ros2_ws/install
+    networks:
+      - defined_net
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    command: >
+      ros2 launch defined_bringup simulation.launch.py use_gui:=true
+
+# ---------------------------------------------------------------------------
+# Named volumes — persist colcon build artefacts across restarts.
+# Remove with: docker compose down -v
+# ---------------------------------------------------------------------------
+volumes:
+  defined_build:
+  defined_install:
 
 networks:
   defined_net:

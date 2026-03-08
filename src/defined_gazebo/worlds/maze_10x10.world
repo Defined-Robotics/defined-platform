@@ -1,0 +1,233 @@
+<?xml version="1.0"?>
+<!--
+  maze_10x10.world
+  Defined Robotics — Gazebo Classic simulation world.
+
+  A 10 m x 10 m indoor room with an S-curve maze formed by two internal walls:
+
+    Wall A (horizontal): y = +2.0, spans x = -5.0 to x = +1.0
+                         leaves a 4 m gap on the east side (x=1 to x=5)
+    Wall B (horizontal): y = -2.0, spans x = -1.0 to x = +5.0
+                         leaves a 4 m gap on the west side (x=-5 to x=-1)
+
+  Navigation path (S-curve):
+    Spawn  (-3, -3) → east through Wall B gap → (3,  0) → west through Wall A gap → (3, 3)
+
+  All walls: 0.20 m thick, 1.0 m tall.
+  Robot spawned separately by gazebo.launch.py via spawn_entity.
+-->
+<sdf version="1.6">
+  <world name="maze_10x10">
+
+    <!-- ============================================================
+         PHYSICS
+         ============================================================ -->
+    <physics type="ode">
+      <real_time_update_rate>1000</real_time_update_rate>
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <ode>
+        <solver>
+          <type>quick</type>
+          <iters>150</iters>
+          <precon_iters>0</precon_iters>
+          <sor>1.4</sor>
+        </solver>
+        <constraints>
+          <cfm>1e-5</cfm>
+          <erp>0.2</erp>
+          <contact_max_correcting_vel>2000</contact_max_correcting_vel>
+          <contact_surface_layer>0.01</contact_surface_layer>
+        </constraints>
+      </ode>
+    </physics>
+
+    <!-- ============================================================
+         SCENE / LIGHTING
+         ============================================================ -->
+    <scene>
+      <ambient>0.4 0.4 0.4 1</ambient>
+      <background>0.7 0.7 0.7 1</background>
+      <shadows>false</shadows>
+    </scene>
+
+    <light name="sun" type="directional">
+      <cast_shadows>false</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <!-- ============================================================
+         GROUND PLANE
+         ============================================================ -->
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+          <surface>
+            <friction><ode><mu>1</mu><mu2>1</mu2></ode></friction>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Grey</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         OUTER PERIMETER WALLS (same as room_10x10)
+         Room: 10 m x 10 m, centred at origin.
+         ============================================================ -->
+
+    <model name="wall_north">
+      <static>true</static>
+      <pose>0 5.0 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>10.0 0.2 1.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>10.0 0.2 1.0</size></box></geometry>
+          <material><script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/White</name>
+          </script></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_south">
+      <static>true</static>
+      <pose>0 -5.0 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>10.0 0.2 1.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>10.0 0.2 1.0</size></box></geometry>
+          <material><script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/White</name>
+          </script></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_east">
+      <static>true</static>
+      <pose>5.0 0 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>0.2 10.4 1.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.2 10.4 1.0</size></box></geometry>
+          <material><script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/White</name>
+          </script></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_west">
+      <static>true</static>
+      <pose>-5.0 0 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>0.2 10.4 1.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.2 10.4 1.0</size></box></geometry>
+          <material><script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/White</name>
+          </script></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         MAZE INTERNAL WALLS
+         ============================================================ -->
+
+    <!--
+      Wall A: horizontal at y = +2.0
+      Spans x = -5.0 (west wall) to x = +1.0
+      Centre: x = -2.0, y = +2.0
+      Length: 6.0 m, thickness: 0.2 m, height: 1.0 m
+      Gap: east side, from x=+1.0 to x=+5.0 (4 m wide)
+    -->
+    <model name="maze_wall_a">
+      <static>true</static>
+      <pose>-2.0 2.0 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>6.0 0.2 1.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 0.2 1.0</size></box></geometry>
+          <material><script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script></material>
+        </visual>
+      </link>
+    </model>
+
+    <!--
+      Wall B: horizontal at y = -2.0
+      Spans x = -1.0 to x = +5.0 (east wall)
+      Centre: x = +2.0, y = -2.0
+      Length: 6.0 m, thickness: 0.2 m, height: 1.0 m
+      Gap: west side, from x=-5.0 to x=-1.0 (4 m wide)
+    -->
+    <model name="maze_wall_b">
+      <static>true</static>
+      <pose>2.0 -2.0 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>6.0 0.2 1.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 0.2 1.0</size></box></geometry>
+          <material><script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         GUI CAMERA START POSITION
+         ============================================================ -->
+    <gui fullscreen="0">
+      <camera name="user_camera">
+        <pose>0 -14 10 0 0.65 1.57</pose>
+        <view_controller>orbit</view_controller>
+      </camera>
+    </gui>
+
+  </world>
+</sdf>
