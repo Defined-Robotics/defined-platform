@@ -76,6 +76,7 @@ from launch.actions import (
     IncludeLaunchDescription,
     TimerAction,
 )
+from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import (
     AnyLaunchDescriptionSource,
     PythonLaunchDescriptionSource,
@@ -129,6 +130,12 @@ def generate_launch_description():
         description='Auto-activate Nav2 lifecycle nodes',
     )
 
+    use_slam_arg = DeclareLaunchArgument(
+        'use_slam',
+        default_value='true',
+        description='Use SLAM (slam_toolbox) instead of static map + AMCL',
+    )
+
     x_arg   = DeclareLaunchArgument('x',   default_value='0.0',  description='Robot spawn X (m)')
     y_arg   = DeclareLaunchArgument('y',   default_value='0.0',  description='Robot spawn Y (m)')
     z_arg   = DeclareLaunchArgument('z',   default_value='0.05', description='Robot spawn Z (m)')
@@ -158,6 +165,9 @@ def generate_launch_description():
     # Stage 2 — Nav2 stack (t = 5 s)
     # Delayed slightly so Gazebo has started. Nav2 will retry TF until the robot
     # is spawned — no need to sync with spawn which can take 2-5 min on Docker Desktop.
+    #
+    # use_slam:=false (default) → static map + AMCL localisation
+    # use_slam:=true            → slam_toolbox online async (no map needed)
     # ---------------------------------------------------------------------------
     navigation_launch = TimerAction(
         period=5.0,
@@ -176,6 +186,28 @@ def generate_launch_description():
                     'use_sim_time': LaunchConfiguration('use_sim_time'),
                     'autostart':    LaunchConfiguration('autostart'),
                 }.items(),
+                condition=UnlessCondition(LaunchConfiguration('use_slam')),
+            )
+        ],
+    )
+
+    navigation_slam_launch = TimerAction(
+        period=5.0,
+        actions=[
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(
+                    os.path.join(
+                        get_package_share_directory('defined_navigation'),
+                        'launch',
+                        'navigation_slam.launch.py',
+                    )
+                ),
+                launch_arguments={
+                    'params_file':  LaunchConfiguration('params_file'),
+                    'use_sim_time': LaunchConfiguration('use_sim_time'),
+                    'autostart':    LaunchConfiguration('autostart'),
+                }.items(),
+                condition=IfCondition(LaunchConfiguration('use_slam')),
             )
         ],
     )
@@ -231,6 +263,7 @@ def generate_launch_description():
         params_file_arg,
         use_gui_arg,
         use_sim_time_arg,
+        use_slam_arg,
         autostart_arg,
         x_arg,
         y_arg,
@@ -239,6 +272,7 @@ def generate_launch_description():
         # Stages
         gazebo_launch,
         navigation_launch,
+        navigation_slam_launch,
         rosbridge_launch,
         foxglove_launch,
     ])

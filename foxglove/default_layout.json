@@ -1,0 +1,52 @@
+{
+  "configById": {
+    "3D!main": {
+      "cameraState": {
+        "distance": 12,
+        "perspective": true,
+        "phi": 45,
+        "target": [0, 0, 0],
+        "thetaOffset": 0
+      },
+      "followTf": "base_link",
+      "topics": {
+        "/robot_description": { "visible": true },
+        "/map": { "visible": true, "colorMode": "costmap" },
+        "/global_costmap/costmap": { "visible": true, "alpha": 0.3 },
+        "/local_costmap/costmap": { "visible": true, "alpha": 0.3 },
+        "/plan": { "visible": true, "lineWidth": 0.05 },
+        "/scan": { "visible": true, "pointSize": 4, "colorMode": "flat", "flatColor": "#ff0000" },
+        "/tf": { "visible": true }
+      }
+    },
+    "Plot!cmd_vel": {
+      "paths": [
+        { "value": "/cmd_vel.linear.x", "label": "linear.x" },
+        { "value": "/cmd_vel.angular.z", "label": "angular.z" }
+      ],
+      "xAxisVal": "timestamp",
+      "maxXRange": 30
+    },
+    "Plot!odom": {
+      "paths": [
+        { "value": "/odom.pose.pose.position.x", "label": "x" },
+        { "value": "/odom.pose.pose.position.y", "label": "y" }
+      ],
+      "xAxisVal": "timestamp",
+      "maxXRange": 60
+    }
+  },
+  "globalVariables": {},
+  "userNodes": {},
+  "layout": {
+    "direction": "row",
+    "first": "3D!main",
+    "second": {
+      "direction": "column",
+      "first": "Plot!cmd_vel",
+      "second": "Plot!odom",
+      "splitPercentage": 50
+    },
+    "splitPercentage": 70
+  }
+}

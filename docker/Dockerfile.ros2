@@ -36,6 +36,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-xacro \
     ros-humble-tf2-ros \
     ros-humble-tf2-tools \
+    ros-humble-teleop-twist-keyboard \
     python3-colcon-common-extensions \
     libgl1-mesa-dri \
     && rm -rf /var/lib/apt/lists/*
