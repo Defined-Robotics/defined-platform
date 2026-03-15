@@ -323,7 +323,7 @@ local_costmap:
           data_type:           "LaserScan"
           raytrace_max_range:  3.5
           raytrace_min_range:  0.12
-          obstacle_max_range:  3.0
+          obstacle_max_range:  3.5
           obstacle_min_range:  0.12
       inflation_layer:
         plugin:             "nav2_costmap_2d::InflationLayer"
@@ -339,8 +339,8 @@ global_costmap:
   global_costmap:
     ros__parameters:
       use_sim_time:      true
-      update_frequency:  1.0
-      publish_frequency: 1.0
+      update_frequency:  2.0
+      publish_frequency: 2.0
       global_frame:      map
       robot_base_frame:  base_footprint
       footprint: "[ [0.145, 0.12], [0.145, -0.12], [-0.145, -0.12], [-0.145, 0.12] ]"
@@ -362,7 +362,7 @@ global_costmap:
           data_type:           "LaserScan"
           raytrace_max_range:  3.5
           raytrace_min_range:  0.12
-          obstacle_max_range:  3.0
+          obstacle_max_range:  3.5
           obstacle_min_range:  0.12
       inflation_layer:
         plugin:             "nav2_costmap_2d::InflationLayer"

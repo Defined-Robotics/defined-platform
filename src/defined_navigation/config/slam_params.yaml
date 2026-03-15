@@ -1,15 +1,17 @@
 # slam_params.yaml
 # Defined Robotics — slam_toolbox online async configuration
 #
+# Based on slam_toolbox default mapper_params_online_async.yaml
+# (the config used in the Nav2 SLAM tutorial), with only frame names
+# and laser range overridden to match our robot.
+#
 # Used when launching with use_slam:=true.
-# slam_toolbox replaces map_server + amcl: it simultaneously builds a map
-# and localises the robot using /scan data.
 
 slam_toolbox:
   ros__parameters:
     use_sim_time: true
 
-    # Solver
+    # Solver (defaults)
     solver_plugin: solver_plugins::CeresSolver
     ceres_linear_solver: SPARSE_NORMAL_CHOLESKY
     ceres_preconditioner: SCHUR_JACOBI
@@ -26,7 +28,7 @@ slam_toolbox:
 
     # Timing
     transform_publish_period: 0.02
-    map_update_interval: 2.0
+    map_update_interval: 5.0
     minimum_time_interval: 0.5
     transform_timeout: 0.2
     tf_buffer_duration: 30.0
@@ -38,16 +40,16 @@ slam_toolbox:
     min_laser_range: 0.12
     max_laser_range: 3.5
 
-    # Scan processing
+    # Scan processing (slam_toolbox defaults)
     throttle_scans: 1
     use_scan_matching: true
     use_scan_barycenter: true
-    minimum_travel_distance: 0.3
-    minimum_travel_heading: 0.3
+    minimum_travel_distance: 0.5
+    minimum_travel_heading: 0.5
     scan_buffer_size: 10
     scan_buffer_maximum_scan_distance: 10.0
 
-    # Loop closure
+    # Loop closure (defaults)
     do_loop_closing: true
     loop_search_maximum_distance: 3.0
     loop_match_minimum_chain_size: 10
@@ -55,17 +57,17 @@ slam_toolbox:
     loop_match_minimum_response_coarse: 0.35
     loop_match_minimum_response_fine: 0.45
 
-    # Correlation
+    # Correlation (defaults)
     correlation_search_space_dimension: 0.5
     correlation_search_space_resolution: 0.01
     correlation_search_space_smear_deviation: 0.1
 
-    # Loop closure search space
+    # Loop closure search space (defaults)
     loop_search_space_dimension: 8.0
     loop_search_space_resolution: 0.05
     loop_search_space_smear_deviation: 0.03
 
-    # Scan matcher
+    # Scan matcher (defaults)
     distance_variance_penalty: 0.5
     angle_variance_penalty: 1.0
     fine_search_angle_offset: 0.00349
