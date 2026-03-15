@@ -42,9 +42,9 @@
   <xacro:property name="wheel_y"   value="${wheel_separation / 2.0}"/>
   <!-- Wheel Z relative to base_link centre; wheel tangent at base bottom -->
   <xacro:property name="wheel_z"   value="${-base_height / 2.0}"/>
-  <!-- Caster at front edge of base, level with ground -->
+  <!-- Caster at front edge of base, bottom touching ground -->
   <xacro:property name="caster_x"  value="${base_length / 2.0 - caster_radius}"/>
-  <xacro:property name="caster_z"  value="${-base_height / 2.0 - caster_radius}"/>
+  <xacro:property name="caster_z"  value="${-(base_height / 2.0 + wheel_radius - caster_radius)}"/>
 
   <!-- ============================================================
        INERTIA HELPERS
@@ -88,8 +88,10 @@
   <joint name="base_footprint_joint" type="fixed">
     <parent link="base_footprint"/>
     <child  link="base_link"/>
-    <!-- Lift base_link centre to wheel_radius above ground -->
-    <origin xyz="0 0 ${wheel_radius}" rpy="0 0 0"/>
+    <!-- Lift base_link centre so wheel axles are at ground level:
+         base_link_z = base_height/2 + wheel_radius
+         This ensures wheel bottoms touch ground and caster contacts ground. -->
+    <origin xyz="0 0 ${base_height / 2.0 + wheel_radius}" rpy="0 0 0"/>
   </joint>
 
   <!-- ============================================================
@@ -195,7 +197,7 @@
 
   <!-- ============================================================
        LIDAR — 2D laser scanner on top of base
-       360° scan, 0.12–3.5 m range, ~5.5 Hz, 360 samples
+       360° scan, 0.12–3.5 m range, ~20 Hz, 720 samples
        Publishes to Gz topic /scan (bridged to ROS2 by ros_gz_bridge)
        ============================================================ -->
   <xacro:property name="lidar_radius" value="0.030"/>
@@ -230,13 +232,13 @@
     <sensor type="gpu_lidar" name="lidar_sensor">
       <pose>0 0 0 0 0 0</pose>
       <visualize>true</visualize>
-      <update_rate>5.5</update_rate>
+      <update_rate>20</update_rate>
       <topic>/scan</topic>
       <gz_frame_id>lidar_link</gz_frame_id>
       <ray>
         <scan>
           <horizontal>
-            <samples>360</samples>
+            <samples>720</samples>
             <resolution>1</resolution>
             <min_angle>-3.14159265359</min_angle>
             <max_angle>3.14159265359</max_angle>
@@ -250,7 +252,7 @@
         <noise>
           <type>gaussian</type>
           <mean>0.0</mean>
-          <stddev>0.01</stddev>
+          <stddev>0.0</stddev>
         </noise>
       </ray>
     </sensor>
@@ -260,7 +262,7 @@
        GZ SIM PLUGIN: DIFFERENTIAL DRIVE
        Subscribes : /cmd_vel  (gz.msgs.Twist)
        Publishes  : /odom     (gz.msgs.Odometry)
-       Broadcasts : odom → base_footprint TF (via ros_gz_bridge)
+       TF odom→base_footprint: published by odom_tf_broadcaster.py from /odom
        ============================================================ -->
   <gazebo>
     <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
@@ -278,7 +280,7 @@
       <frame_id>odom</frame_id>
       <child_frame_id>base_footprint</child_frame_id>
       <odom_publish_frequency>50</odom_publish_frequency>
-      <tf_topic>/tf</tf_topic>
+      <tf_topic>/odom_tf</tf_topic>
     </plugin>
   </gazebo>
 
