@@ -256,6 +256,42 @@ def generate_launch_description():
         ],
     )
 
+    # ---------------------------------------------------------------------------
+    # Stage 5 — BT Executor (t = 15 s, optional)
+    # Only launched when run_task:=/path/to/task.xml is provided.
+    # Delayed to ensure Nav2 lifecycle nodes are active.
+    # ---------------------------------------------------------------------------
+    run_bt_arg = DeclareLaunchArgument(
+        'run_bt',
+        default_value='false',
+        description='Launch BT executor (set true to enable)',
+    )
+    run_task_arg = DeclareLaunchArgument(
+        'run_task',
+        default_value='',
+        description='Path to BT XML file to auto-execute (empty = wait for /task_command)',
+    )
+
+    bt_executor_launch = TimerAction(
+        period=15.0,
+        actions=[
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(
+                    os.path.join(
+                        get_package_share_directory('defined_runtime'),
+                        'launch',
+                        'bt_executor.launch.py',
+                    )
+                ),
+                launch_arguments={
+                    'bt_xml_path':   LaunchConfiguration('run_task'),
+                    'use_sim_time':  LaunchConfiguration('use_sim_time'),
+                }.items(),
+                condition=IfCondition(LaunchConfiguration('run_bt')),
+            )
+        ],
+    )
+
     return LaunchDescription([
         # Arguments
         world_arg,
@@ -269,10 +305,13 @@ def generate_launch_description():
         y_arg,
         z_arg,
         yaw_arg,
+        run_bt_arg,
+        run_task_arg,
         # Stages
         gazebo_launch,
         navigation_launch,
         navigation_slam_launch,
         rosbridge_launch,
         foxglove_launch,
+        bt_executor_launch,
     ])
