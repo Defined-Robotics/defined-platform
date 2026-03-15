@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+    <BehaviorTree ID="TestPatrol">
+        <Sequence name="patrol_seq">
+            <Action ID="GoTo" name="go_to_1_0" x="1.0" y="0.0" theta="0.0" frame_id="map" server_name="/navigate_to_pose" timeout="10.0" />
+            <Action ID="Report" name="report_wp1" message="reached_wp1" topic="/task_reports" level="info" />
+            <Action ID="Wait" name="wait_1s" duration="1.0" />
+            <Action ID="GoTo" name="go_to_0_0" x="0.0" y="0.0" theta="0.0" frame_id="map" server_name="/navigate_to_pose" timeout="10.0" />
+            <Action ID="Report" name="report_done" message="patrol_done" topic="/task_reports" level="info" />
+        </Sequence>
+    </BehaviorTree>
+    <TreeNodesModel>
+        <Action ID="GoTo">
+            <input_port name="x">Target X</input_port>
+            <input_port name="y">Target Y</input_port>
+            <input_port name="theta" default="0.0">Orientation</input_port>
+            <input_port name="timeout" default="60.0">Timeout</input_port>
+            <input_port name="frame_id" default="map">Frame</input_port>
+            <input_port name="server_name" default="/navigate_to_pose">Action server</input_port>
+            <output_port name="error_code">Error code</output_port>
+        </Action>
+        <Action ID="Wait">
+            <input_port name="duration">Duration</input_port>
+        </Action>
+        <Action ID="Report">
+            <input_port name="message" default="checkpoint">Message</input_port>
+            <input_port name="topic" default="/task_reports">Topic</input_port>
+            <input_port name="level" default="info">Level</input_port>
+            <output_port name="success">Success</output_port>
+        </Action>
+    </TreeNodesModel>
+</root>

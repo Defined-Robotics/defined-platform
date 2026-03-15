@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+    <BehaviorTree ID="TestWaitReport">
+        <Sequence name="test_seq">
+            <Action ID="Wait" name="wait_0.1s" duration="0.1" />
+            <Action ID="Report" name="report_test" message="test_done" topic="/task_reports" level="info" />
+        </Sequence>
+    </BehaviorTree>
+    <TreeNodesModel>
+        <Action ID="Wait">
+            <input_port name="duration">Wait duration in seconds</input_port>
+        </Action>
+        <Action ID="Report">
+            <input_port name="message" default="checkpoint">Report message</input_port>
+            <input_port name="topic" default="/task_reports">ROS topic</input_port>
+            <input_port name="level" default="info">Severity level</input_port>
+            <output_port name="success">Whether report was published</output_port>
+        </Action>
+    </TreeNodesModel>
+</root>

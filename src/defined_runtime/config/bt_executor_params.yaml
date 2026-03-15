@@ -1,0 +1,5 @@
+bt_executor:
+  ros__parameters:
+    bt_xml_path: ""
+    tick_rate: 100.0
+    enable_groot: true
