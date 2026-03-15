@@ -38,7 +38,7 @@ docker exec -it defined_sim bash
 Then send a navigation goal:
 
 ```bash
-source /opt/ros/humble/setup.bash
+source /opt/ros/jazzy/setup.bash
 source /ros2_ws/install/setup.bash
 
 ros2 action send_goal /navigate_to_pose nav2_msgs/action/NavigateToPose \
@@ -59,12 +59,11 @@ xhost +127.0.0.1
 # RViz:
 DISPLAY=host.docker.internal:1 docker compose -f docker/docker-compose.yml --profile viz up rviz
 
-# Gazebo GUI:
+# Gz Sim GUI:
 DISPLAY=host.docker.internal:1 docker compose -f docker/docker-compose.yml --profile gui up sim-gui
 ```
 
 ## Troubleshooting
 
 - **Named volumes cache stale builds**: `docker compose -f docker/docker-compose.yml down -v` to clear
-- **Robot not spawning**: The spawn entity retry loop takes 2-4 min on Docker Desktop — wait for `Successfully spawned`
 - **sim and sim-gui conflict**: Both bind port 9090. Stop one before starting the other

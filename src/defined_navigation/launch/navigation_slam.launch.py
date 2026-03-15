@@ -101,7 +101,7 @@ def generate_launch_description():
 
     # -----------------------------------------------------------------------
     # slam_toolbox — online async SLAM
-    # Not lifecycle-managed (it manages its own state).
+    # In Jazzy, slam_toolbox is a lifecycle node — managed by lifecycle_manager.
     # Publishes /map and map→odom TF from /scan.
     # -----------------------------------------------------------------------
     slam_toolbox = Node(
@@ -179,6 +179,21 @@ def generate_launch_description():
         ],
     )
 
+    # Separate lifecycle manager for slam_toolbox — bond disabled because
+    # slam_toolbox in Jazzy doesn't support Nav2 bond heartbeats.
+    lifecycle_manager_slam = Node(
+        package='nav2_lifecycle_manager',
+        executable='lifecycle_manager',
+        name='lifecycle_manager_slam',
+        output='screen',
+        parameters=[{
+            'use_sim_time': LaunchConfiguration('use_sim_time'),
+            'autostart':    LaunchConfiguration('autostart'),
+            'node_names':   ['slam_toolbox'],
+            'bond_timeout': 0.0,
+        }],
+    )
+
     lifecycle_manager = Node(
         package='nav2_lifecycle_manager',
         executable='lifecycle_manager',
@@ -200,6 +215,7 @@ def generate_launch_description():
         set_sim_time,
         # SLAM (replaces map_server + amcl)
         slam_toolbox,
+        lifecycle_manager_slam,
         # Nav2 nodes
         controller_server,
         smoother_server,

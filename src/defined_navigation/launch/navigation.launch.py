@@ -101,7 +101,7 @@ def generate_launch_description():
     # ---------------------------------------------------------------------------
     # RewrittenYaml — injects the resolved map path and sim time flag into the
     # params file at launch time, so the YAML itself does not hard-code paths.
-    # From nav2_common (ros-humble-nav2-common package).
+    # From nav2_common (ros-jazzy-nav2-common package).
     # ---------------------------------------------------------------------------
     param_substitutions = {
         'use_sim_time':  LaunchConfiguration('use_sim_time'),

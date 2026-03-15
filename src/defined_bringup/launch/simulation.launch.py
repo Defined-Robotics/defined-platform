@@ -2,7 +2,7 @@
 simulation.launch.py
 Defined Robotics — defined_bringup package
 
-MIDDLEWARE ADAPTER LAYER (ROS2 / Humble)
+MIDDLEWARE ADAPTER LAYER (ROS2 / Jazzy)
 -----------------------------------------
 This file is ROS2-specific by design.  It is the single entry point that
 composes the full simulation stack.  Everything outside defined_platform
@@ -23,7 +23,7 @@ HOW THIS FILE FITS THE MIDDLEWARE ISOLATION DESIGN
   defined_platform   ← this workspace (ROS2 / Nav2 / Gazebo adapter)
     defined_bringup/platform_interface.py  ← boundary types
     defined_bringup/launch/simulation.launch.py  ← YOU ARE HERE
-    defined_gazebo    ← Gazebo Classic adapter
+    defined_gazebo    ← Gz Sim adapter
     defined_navigation ← Nav2 adapter
     defined_description ← URDF/xacro (impl detail of ROS2 layer)
     defined_runtime   ← BT executor (ROS2 action client)
@@ -35,8 +35,8 @@ WHAT THIS FILE DOES
 -------------------
 Boots the full simulation in three ordered stages:
 
-  Stage 1 (t=0s):  Gazebo Classic
-    gzserver + (optional) gzclient + robot_state_publisher + spawn_entity
+  Stage 1 (t=0s):  Gz Sim
+    gz sim + robot_state_publisher + spawn + ros_gz_bridge
     → defined_gazebo/launch/gazebo.launch.py
 
   Stage 2 (t=5s):  Nav2 stack
@@ -49,15 +49,15 @@ Boots the full simulation in three ordered stages:
     ws://localhost:9090
 
 Launch arguments (all optional — defaults produce a runnable sim):
-  world        : Gazebo world file       (default: room_10x10.world)
+  world        : Gz Sim world file       (default: room_10x10.sdf)
   map          : Nav2 map yaml           (default: room_10x10.yaml)
   params_file  : Nav2 params yaml        (default: nav2_params.yaml)
-  use_gui      : launch gzclient         (default: true; false for headless)
+  use_gui      : launch Gz GUI           (default: true; false for headless)
   use_sim_time : use /clock              (default: true)
   autostart    : auto-activate Nav2      (default: true)
   x, y, z, yaw: robot spawn pose
 
-Usage (host, ROS2 Humble sourced):
+Usage (host, ROS2 Jazzy sourced):
   ros2 launch defined_bringup simulation.launch.py
 
 Usage (headless, Docker):
@@ -96,8 +96,8 @@ def generate_launch_description():
     # ---------------------------------------------------------------------------
     world_arg = DeclareLaunchArgument(
         'world',
-        default_value=os.path.join(pkg_gazebo, 'worlds', 'maze_10x10.world'),
-        description='Gazebo world file',
+        default_value=os.path.join(pkg_gazebo, 'worlds', 'maze_10x10.sdf'),
+        description='Gz Sim world file',
     )
 
     map_arg = DeclareLaunchArgument(
@@ -115,13 +115,13 @@ def generate_launch_description():
     use_gui_arg = DeclareLaunchArgument(
         'use_gui',
         default_value='true',
-        description='Launch Gazebo GUI gzclient (set false for headless/Docker)',
+        description='Launch Gz Sim GUI (set false for headless/Docker)',
     )
 
     use_sim_time_arg = DeclareLaunchArgument(
         'use_sim_time',
         default_value='true',
-        description='Use Gazebo /clock for simulation time',
+        description='Use Gz Sim /clock for simulation time',
     )
 
     autostart_arg = DeclareLaunchArgument(
@@ -142,9 +142,9 @@ def generate_launch_description():
     yaw_arg = DeclareLaunchArgument('yaw', default_value='0.0',  description='Robot spawn yaw (rad)')
 
     # ---------------------------------------------------------------------------
-    # Stage 1 — Gazebo (t = 0 s)
-    # Brings up gzserver, robot_state_publisher, and spawns the robot.
-    # All ROS2 Gazebo-specific code lives in defined_gazebo.
+    # Stage 1 — Gz Sim (t = 0 s)
+    # Brings up Gz Sim, robot_state_publisher, spawns the robot, and bridges topics.
+    # All ROS2 Gz-specific code lives in defined_gazebo.
     # ---------------------------------------------------------------------------
     gazebo_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -163,8 +163,8 @@ def generate_launch_description():
 
     # ---------------------------------------------------------------------------
     # Stage 2 — Nav2 stack (t = 5 s)
-    # Delayed slightly so Gazebo has started. Nav2 will retry TF until the robot
-    # is spawned — no need to sync with spawn which can take 2-5 min on Docker Desktop.
+    # Delayed slightly so Gz Sim has started. Nav2 will retry TF until the robot
+    # is spawned.
     #
     # use_slam:=false (default) → static map + AMCL localisation
     # use_slam:=true            → slam_toolbox online async (no map needed)

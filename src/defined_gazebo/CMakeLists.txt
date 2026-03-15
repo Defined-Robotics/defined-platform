@@ -3,7 +3,7 @@ project(defined_gazebo)
 
 find_package(ament_cmake REQUIRED)
 
-install(DIRECTORY worlds launch models
+install(DIRECTORY worlds launch models config
   DESTINATION share/${PROJECT_NAME}
 )
 

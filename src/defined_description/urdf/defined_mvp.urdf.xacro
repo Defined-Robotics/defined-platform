@@ -12,9 +12,12 @@
     Wheels : cylinder radius=0.033 m, width=0.020 m  (left + right)
     Caster : sphere  radius=0.010 m  (front, passive)
 
-  Gazebo plugins:
-    libgazebo_ros_diff_drive           → /cmd_vel, /odom, odom→base_footprint TF
-    libgazebo_ros_joint_state_publisher → /joint_states
+  Gz Sim plugins (declared in URDF <gazebo> blocks, converted to SDF by ros_gz):
+    gz-sim-diff-drive-system        → subscribes /cmd_vel, publishes /odom (Gz topics)
+    gz-sim-joint-state-publisher-system → publishes /joint_states (Gz topic)
+    Lidar sensor                    → publishes /scan (Gz topic)
+
+  All Gz topics are bridged to ROS2 by ros_gz_bridge in gazebo.launch.py.
 -->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="defined_mvp">
 
@@ -110,10 +113,6 @@
                        x="${base_length}" y="${base_width}" z="${base_height}"/>
   </link>
 
-  <gazebo reference="base_link">
-    <material>Gazebo/Blue</material>
-  </gazebo>
-
   <!-- ============================================================
        WHEEL MACRO
        side   : "left" | "right"
@@ -149,13 +148,12 @@
       <axis xyz="0 1 0"/>
     </joint>
 
-    <!-- Gazebo: high friction so wheels grip the floor -->
+    <!-- Gz: high friction so wheels grip the floor -->
     <gazebo reference="${side}_wheel_link">
       <mu1>1.0</mu1>
       <mu2>1.0</mu2>
       <kp>1000000.0</kp>
       <kd>100.0</kd>
-      <material>Gazebo/DarkGrey</material>
     </gazebo>
 
   </xacro:macro>
@@ -193,13 +191,12 @@
     <!-- Zero friction so caster slides freely -->
     <mu1>0.0</mu1>
     <mu2>0.0</mu2>
-    <material>Gazebo/Grey</material>
   </gazebo>
 
   <!-- ============================================================
        LIDAR — 2D laser scanner on top of base
        360° scan, 0.12–3.5 m range, ~5.5 Hz, 360 samples
-       Publishes sensor_msgs/LaserScan on /scan
+       Publishes to Gz topic /scan (bridged to ROS2 by ros_gz_bridge)
        ============================================================ -->
   <xacro:property name="lidar_radius" value="0.030"/>
   <xacro:property name="lidar_height" value="0.020"/>
@@ -230,11 +227,12 @@
   </joint>
 
   <gazebo reference="lidar_link">
-    <material>Gazebo/Black</material>
-    <sensor type="ray" name="lidar_sensor">
+    <sensor type="gpu_lidar" name="lidar_sensor">
       <pose>0 0 0 0 0 0</pose>
       <visualize>true</visualize>
       <update_rate>5.5</update_rate>
+      <topic>/scan</topic>
+      <gz_frame_id>lidar_link</gz_frame_id>
       <ray>
         <scan>
           <horizontal>
@@ -255,59 +253,47 @@
           <stddev>0.01</stddev>
         </noise>
       </ray>
-      <plugin name="gazebo_ros_lidar" filename="libgazebo_ros_ray_sensor.so">
-        <ros>
-          <remapping>~/out:=scan</remapping>
-        </ros>
-        <output_type>sensor_msgs/LaserScan</output_type>
-        <frame_name>lidar_link</frame_name>
-      </plugin>
     </sensor>
   </gazebo>
 
   <!-- ============================================================
-       GAZEBO PLUGIN: DIFFERENTIAL DRIVE
-       Subscribes : /cmd_vel  (geometry_msgs/Twist)
-       Publishes  : /odom     (nav_msgs/Odometry)
-       Broadcasts : odom → base_footprint TF
+       GZ SIM PLUGIN: DIFFERENTIAL DRIVE
+       Subscribes : /cmd_vel  (gz.msgs.Twist)
+       Publishes  : /odom     (gz.msgs.Odometry)
+       Broadcasts : odom → base_footprint TF (via ros_gz_bridge)
        ============================================================ -->
   <gazebo>
-    <plugin name="diff_drive_controller" filename="libgazebo_ros_diff_drive.so">
-      <update_rate>50</update_rate>
-
+    <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
       <left_joint>left_wheel_joint</left_joint>
       <right_joint>right_wheel_joint</right_joint>
 
       <!-- Must match RDF yaml values -->
       <wheel_separation>${wheel_separation}</wheel_separation>
-      <wheel_diameter>${2.0 * wheel_radius}</wheel_diameter>
+      <wheel_radius>${wheel_radius}</wheel_radius>
 
-      <max_wheel_torque>20</max_wheel_torque>
-      <max_wheel_acceleration>1.0</max_wheel_acceleration>
+      <max_linear_acceleration>1.0</max_linear_acceleration>
 
-      <command_topic>cmd_vel</command_topic>
-      <odometry_topic>odom</odometry_topic>
-      <odometry_frame>odom</odometry_frame>
-      <robot_base_frame>base_footprint</robot_base_frame>
-
-      <publish_odom>true</publish_odom>
-      <publish_odom_tf>true</publish_odom_tf>
-      <!-- TF for wheel joints comes from joint_state_publisher + robot_state_publisher -->
-      <publish_wheel_tf>false</publish_wheel_tf>
+      <topic>/cmd_vel</topic>
+      <odom_topic>/odom</odom_topic>
+      <frame_id>odom</frame_id>
+      <child_frame_id>base_footprint</child_frame_id>
+      <odom_publish_frequency>50</odom_publish_frequency>
+      <tf_topic>/tf</tf_topic>
     </plugin>
   </gazebo>
 
   <!-- ============================================================
-       GAZEBO PLUGIN: JOINT STATE PUBLISHER
-       Publishes  : /joint_states (sensor_msgs/JointState)
-       Required by robot_state_publisher to compute wheel TF.
+       GZ SIM PLUGIN: JOINT STATE PUBLISHER
+       Publishes  : /world/<world>/model/defined_mvp/joint_state (gz topic)
+       Bridged to /joint_states by ros_gz_bridge.
        ============================================================ -->
   <gazebo>
-    <plugin name="gazebo_joint_state_publisher"
-            filename="libgazebo_ros_joint_state_publisher.so">
-      <update_rate>50</update_rate>
+    <plugin filename="gz-sim-joint-state-publisher-system"
+            name="gz::sim::systems::JointStatePublisher">
       <joint_name>left_wheel_joint</joint_name>
       <joint_name>right_wheel_joint</joint_name>
+      <update_rate>50</update_rate>
+      <topic>/joint_states</topic>
     </plugin>
   </gazebo>
 

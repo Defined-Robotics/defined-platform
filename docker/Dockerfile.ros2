@@ -1,42 +1,40 @@
 # Defined Robotics — ROS2 Development Container
-# Based on ROS2 Humble for ARM64/AMD64
-# Tag is multi-arch (AMD64 + ARM64). Docker selects the correct variant for the host.
-# To pin again: docker pull --platform linux/arm64 osrf/ros:humble-desktop-full
-#               docker image inspect --format '{{index .RepoDigests 0}}'
-FROM osrf/ros:humble-desktop-full
+# Based on ROS2 Jazzy for ARM64/AMD64
+FROM osrf/ros:jazzy-desktop-full
 
-# Install Nav2, Gazebo Classic, rosbridge, BehaviorTree.CPP, and tooling.
+# Install Nav2, Gz Sim, rosbridge, BehaviorTree.CPP, and tooling.
 #
 # Package notes:
-#   ros-humble-navigation2        : full Nav2 stack (planner, controller, amcl, bt_navigator, …)
-#   ros-humble-nav2-bringup       : nav2_bringup launch helpers
-#   ros-humble-nav2-common        : RewrittenYaml and other launch utilities (used in navigation.launch.py)
-#   gazebo11                      : Gazebo Classic physics engine binary
-#   ros-humble-gazebo-ros-pkgs    : gazebo_ros Python launch files + Gazebo ROS plugins
-#   ros-humble-gazebo-ros         : gzserver / gzclient launch files (subset of gazebo-ros-pkgs)
-#   ros-humble-rosbridge-suite    : WebSocket bridge for dashboard
-#   ros-humble-behaviortree-cpp   : BehaviorTree.CPP runtime (for defined_runtime)
-#   ros-humble-robot-state-publisher : publishes /robot_description + TF from URDF
-#   ros-humble-joint-state-publisher : publishes /joint_states for static joints
-#   ros-humble-xacro              : xacro macro processor (URDF → URDF)
-#   ros-humble-tf2-ros            : TF2 core
-#   ros-humble-tf2-tools          : tf2_echo, view_frames diagnostic utilities
-#   ros-humble-rviz2              : RViz2 visualiser (for the viz Docker profile)
+#   ros-jazzy-navigation2        : full Nav2 stack (planner, controller, amcl, bt_navigator, …)
+#   ros-jazzy-nav2-bringup       : nav2_bringup launch helpers
+#   ros-jazzy-ros-gz             : Gz Sim meta-package (sim + bridge + image)
+#   ros-jazzy-ros-gz-sim         : Gz Sim launch helpers and spawn node
+#   ros-jazzy-ros-gz-bridge      : bidirectional Gz Transport ↔ ROS2 bridge
+#   ros-jazzy-rosbridge-suite    : WebSocket bridge for dashboard
+#   ros-jazzy-behaviortree-cpp   : BehaviorTree.CPP runtime (for defined_runtime)
+#   ros-jazzy-robot-state-publisher : publishes /robot_description + TF from URDF
+#   ros-jazzy-joint-state-publisher : publishes /joint_states for static joints
+#   ros-jazzy-xacro              : xacro macro processor (URDF → URDF)
+#   ros-jazzy-tf2-ros            : TF2 core
+#   ros-jazzy-tf2-tools          : tf2_echo, view_frames diagnostic utilities
+#   ros-jazzy-rviz2              : RViz2 visualiser (for the viz Docker profile)
 #   python3-colcon-common-extensions : colcon build tool
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ros-humble-navigation2 \
-    ros-humble-nav2-bringup \
-    ros-humble-slam-toolbox \
-    ros-humble-gazebo-ros-pkgs \
-    ros-humble-rosbridge-suite \
-    ros-humble-foxglove-bridge \
-    ros-humble-behaviortree-cpp \
-    ros-humble-robot-state-publisher \
-    ros-humble-joint-state-publisher \
-    ros-humble-xacro \
-    ros-humble-tf2-ros \
-    ros-humble-tf2-tools \
-    ros-humble-teleop-twist-keyboard \
+    ros-jazzy-navigation2 \
+    ros-jazzy-nav2-bringup \
+    ros-jazzy-slam-toolbox \
+    ros-jazzy-ros-gz \
+    ros-jazzy-ros-gz-sim \
+    ros-jazzy-ros-gz-bridge \
+    ros-jazzy-rosbridge-suite \
+    ros-jazzy-foxglove-bridge \
+    ros-jazzy-behaviortree-cpp \
+    ros-jazzy-robot-state-publisher \
+    ros-jazzy-joint-state-publisher \
+    ros-jazzy-xacro \
+    ros-jazzy-tf2-ros \
+    ros-jazzy-tf2-tools \
+    ros-jazzy-teleop-twist-keyboard \
     python3-colcon-common-extensions \
     libgl1-mesa-dri \
     && rm -rf /var/lib/apt/lists/*
@@ -55,7 +53,7 @@ RUN chown -R ros:ros /ros2_ws/src
 
 # Build workspace as non-root user
 USER ros
-RUN . /opt/ros/humble/setup.sh && \
+RUN . /opt/ros/jazzy/setup.sh && \
     colcon build --packages-ignore defined_runtime
 
 # Entrypoint (needs root to copy, then switch back)

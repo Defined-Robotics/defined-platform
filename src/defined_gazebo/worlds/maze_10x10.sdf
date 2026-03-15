@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
-  maze_10x10.world
-  Defined Robotics — Gazebo Classic simulation world.
+  maze_10x10.sdf
+  Defined Robotics — Gz Sim simulation world.
 
   A 10 m x 10 m indoor room with an S-curve maze formed by two internal walls:
 
@@ -14,15 +14,25 @@
     Spawn  (-3, -3) → east through Wall B gap → (3,  0) → west through Wall A gap → (3, 3)
 
   All walls: 0.20 m thick, 1.0 m tall.
-  Robot spawned separately by gazebo.launch.py via spawn_entity.
+  Robot spawned separately by gazebo.launch.py via ros_gz_sim create.
 -->
-<sdf version="1.6">
+<sdf version="1.9">
   <world name="maze_10x10">
+
+    <!-- ============================================================
+         GZ SIM SYSTEM PLUGINS
+         ============================================================ -->
+    <plugin filename="gz-sim-physics-system" name="gz::sim::v8::systems::Physics"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::v8::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::v8::systems::UserCommands"/>
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::v8::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
 
     <!-- ============================================================
          PHYSICS
          ============================================================ -->
-    <physics type="ode">
+    <physics name="1ms" type="ode">
       <real_time_update_rate>1000</real_time_update_rate>
       <max_step_size>0.001</max_step_size>
       <real_time_factor>1</real_time_factor>
@@ -85,10 +95,8 @@
             </plane>
           </geometry>
           <material>
-            <script>
-              <uri>file://media/materials/scripts/gazebo.material</uri>
-              <name>Gazebo/Grey</name>
-            </script>
+            <ambient>0.5 0.5 0.5 1</ambient>
+            <diffuse>0.5 0.5 0.5 1</diffuse>
           </material>
         </visual>
       </link>
@@ -108,10 +116,10 @@
         </collision>
         <visual name="visual">
           <geometry><box><size>10.0 0.2 1.0</size></box></geometry>
-          <material><script>
-            <uri>file://media/materials/scripts/gazebo.material</uri>
-            <name>Gazebo/White</name>
-          </script></material>
+          <material>
+            <ambient>0.9 0.9 0.9 1</ambient>
+            <diffuse>0.9 0.9 0.9 1</diffuse>
+          </material>
         </visual>
       </link>
     </model>
@@ -125,10 +133,10 @@
         </collision>
         <visual name="visual">
           <geometry><box><size>10.0 0.2 1.0</size></box></geometry>
-          <material><script>
-            <uri>file://media/materials/scripts/gazebo.material</uri>
-            <name>Gazebo/White</name>
-          </script></material>
+          <material>
+            <ambient>0.9 0.9 0.9 1</ambient>
+            <diffuse>0.9 0.9 0.9 1</diffuse>
+          </material>
         </visual>
       </link>
     </model>
@@ -142,10 +150,10 @@
         </collision>
         <visual name="visual">
           <geometry><box><size>0.2 10.4 1.0</size></box></geometry>
-          <material><script>
-            <uri>file://media/materials/scripts/gazebo.material</uri>
-            <name>Gazebo/White</name>
-          </script></material>
+          <material>
+            <ambient>0.9 0.9 0.9 1</ambient>
+            <diffuse>0.9 0.9 0.9 1</diffuse>
+          </material>
         </visual>
       </link>
     </model>
@@ -159,10 +167,10 @@
         </collision>
         <visual name="visual">
           <geometry><box><size>0.2 10.4 1.0</size></box></geometry>
-          <material><script>
-            <uri>file://media/materials/scripts/gazebo.material</uri>
-            <name>Gazebo/White</name>
-          </script></material>
+          <material>
+            <ambient>0.9 0.9 0.9 1</ambient>
+            <diffuse>0.9 0.9 0.9 1</diffuse>
+          </material>
         </visual>
       </link>
     </model>
@@ -187,10 +195,10 @@
         </collision>
         <visual name="visual">
           <geometry><box><size>6.0 0.2 1.0</size></box></geometry>
-          <material><script>
-            <uri>file://media/materials/scripts/gazebo.material</uri>
-            <name>Gazebo/Orange</name>
-          </script></material>
+          <material>
+            <ambient>1.0 0.5 0.0 1</ambient>
+            <diffuse>1.0 0.5 0.0 1</diffuse>
+          </material>
         </visual>
       </link>
     </model>
@@ -211,23 +219,13 @@
         </collision>
         <visual name="visual">
           <geometry><box><size>6.0 0.2 1.0</size></box></geometry>
-          <material><script>
-            <uri>file://media/materials/scripts/gazebo.material</uri>
-            <name>Gazebo/Orange</name>
-          </script></material>
+          <material>
+            <ambient>1.0 0.5 0.0 1</ambient>
+            <diffuse>1.0 0.5 0.0 1</diffuse>
+          </material>
         </visual>
       </link>
     </model>
-
-    <!-- ============================================================
-         GUI CAMERA START POSITION
-         ============================================================ -->
-    <gui fullscreen="0">
-      <camera name="user_camera">
-        <pose>0 -14 10 0 0.65 1.57</pose>
-        <view_controller>orbit</view_controller>
-      </camera>
-    </gui>
 
   </world>
 </sdf>

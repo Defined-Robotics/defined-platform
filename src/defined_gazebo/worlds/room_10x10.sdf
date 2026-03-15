@@ -1,22 +1,33 @@
 <?xml version="1.0"?>
 <!--
-  room_10x10.world
-  Defined Robotics — Gazebo Classic simulation world.
+  room_10x10.sdf
+  Defined Robotics — Gz Sim simulation world.
 
   A flat 10 m x 10 m indoor room with:
     - Ground plane
     - Four perimeter walls (0.20 m thick, 1.0 m tall)
     - Ambient + directional lighting
+    - Gz Sim system plugins (Physics, SceneBroadcaster, Sensors, UserCommands)
 
-  Robot spawned separately by gazebo.launch.py via spawn_entity.
+  Robot spawned separately by gazebo.launch.py via ros_gz_sim create.
 -->
-<sdf version="1.6">
+<sdf version="1.9">
   <world name="room_10x10">
+
+    <!-- ============================================================
+         GZ SIM SYSTEM PLUGINS
+         ============================================================ -->
+    <plugin filename="gz-sim-physics-system" name="gz::sim::v8::systems::Physics"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::v8::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::v8::systems::UserCommands"/>
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::v8::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
 
     <!-- ============================================================
          PHYSICS
          ============================================================ -->
-    <physics type="ode">
+    <physics name="1ms" type="ode">
       <real_time_update_rate>1000</real_time_update_rate>
       <max_step_size>0.001</max_step_size>
       <real_time_factor>1</real_time_factor>
@@ -85,10 +96,8 @@
             </plane>
           </geometry>
           <material>
-            <script>
-              <uri>file://media/materials/scripts/gazebo.material</uri>
-              <name>Gazebo/Grey</name>
-            </script>
+            <ambient>0.5 0.5 0.5 1</ambient>
+            <diffuse>0.5 0.5 0.5 1</diffuse>
           </material>
         </visual>
       </link>
@@ -98,19 +107,7 @@
          ROOM WALLS
          Room: 10 m x 10 m, centred at origin.
          Wall thickness: 0.20 m, height: 1.0 m.
-         Inner dimension: 9.80 m x 9.80 m (wall centres at ±5.0 m).
-
-         Wall layout (top view):
-                  N (y=+5)
-           W ┌──────────┐ E
-           (-5)         (+5)
-           x            x
-             └──────────┘
-                  S (y=-5)
          ============================================================ -->
-
-    <!-- Wall thickness and height as local constants via pose offsets -->
-    <!-- wall_half_thickness = 0.10, wall_half_height = 0.50 -->
 
     <!-- NORTH wall: y = +5.0, runs along X axis -->
     <model name="wall_north">
@@ -127,10 +124,8 @@
             <box><size>10.0 0.2 1.0</size></box>
           </geometry>
           <material>
-            <script>
-              <uri>file://media/materials/scripts/gazebo.material</uri>
-              <name>Gazebo/White</name>
-            </script>
+            <ambient>0.9 0.9 0.9 1</ambient>
+            <diffuse>0.9 0.9 0.9 1</diffuse>
           </material>
         </visual>
       </link>
@@ -151,10 +146,8 @@
             <box><size>10.0 0.2 1.0</size></box>
           </geometry>
           <material>
-            <script>
-              <uri>file://media/materials/scripts/gazebo.material</uri>
-              <name>Gazebo/White</name>
-            </script>
+            <ambient>0.9 0.9 0.9 1</ambient>
+            <diffuse>0.9 0.9 0.9 1</diffuse>
           </material>
         </visual>
       </link>
@@ -167,7 +160,6 @@
       <link name="link">
         <collision name="collision">
           <geometry>
-            <!-- Length along Y covers full span including corner overlap -->
             <box><size>0.2 10.4 1.0</size></box>
           </geometry>
         </collision>
@@ -176,10 +168,8 @@
             <box><size>0.2 10.4 1.0</size></box>
           </geometry>
           <material>
-            <script>
-              <uri>file://media/materials/scripts/gazebo.material</uri>
-              <name>Gazebo/White</name>
-            </script>
+            <ambient>0.9 0.9 0.9 1</ambient>
+            <diffuse>0.9 0.9 0.9 1</diffuse>
           </material>
         </visual>
       </link>
@@ -200,24 +190,12 @@
             <box><size>0.2 10.4 1.0</size></box>
           </geometry>
           <material>
-            <script>
-              <uri>file://media/materials/scripts/gazebo.material</uri>
-              <name>Gazebo/White</name>
-            </script>
+            <ambient>0.9 0.9 0.9 1</ambient>
+            <diffuse>0.9 0.9 0.9 1</diffuse>
           </material>
         </visual>
       </link>
     </model>
-
-    <!-- ============================================================
-         GUI CAMERA START POSITION
-         ============================================================ -->
-    <gui fullscreen="0">
-      <camera name="user_camera">
-        <pose>0 -12 8 0 0.6 1.57</pose>
-        <view_controller>orbit</view_controller>
-      </camera>
-    </gui>
 
   </world>
 </sdf>

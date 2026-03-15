@@ -3,13 +3,14 @@
 <package format="3">
   <name>defined_gazebo</name>
   <version>0.0.1</version>
-  <description>Gazebo simulation worlds and launch files for Defined Robotics</description>
+  <description>Gz Sim simulation worlds and launch files for Defined Robotics</description>
   <maintainer email="shreyas@definedrobotics.com">Shreyas Gokhale</maintainer>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <depend>gazebo_ros</depend>
+  <depend>ros_gz_sim</depend>
+  <depend>ros_gz_bridge</depend>
   <depend>defined_description</depend>
 
   <export>
