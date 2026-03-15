@@ -54,7 +54,7 @@ RUN chown -R ros:ros /ros2_ws/src
 # Build workspace as non-root user
 USER ros
 RUN . /opt/ros/jazzy/setup.sh && \
-    colcon build --packages-ignore defined_runtime
+    colcon build
 
 # Entrypoint (needs root to copy, then switch back)
 USER root
