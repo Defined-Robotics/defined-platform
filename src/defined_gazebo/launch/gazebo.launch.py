@@ -139,14 +139,13 @@ def generate_launch_description():
         }],
     )
 
-    # Separate bridge for /tf — Pose_V→TFMessage requires CLI syntax
-    gz_tf_bridge = Node(
-        package='ros_gz_bridge',
-        executable='parameter_bridge',
-        name='gz_tf_bridge',
-        arguments=[
-            '/tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V',
-        ],
+    # Publish odom→base_footprint TF from /odom nav_msgs/Odometry topic.
+    # We do NOT use Pose_V→TFMessage bridge because it produces empty
+    # frame_id/child_frame_id (known ros_gz issue #172/#410).
+    odom_tf_node = Node(
+        package='defined_gazebo',
+        executable='odom_tf_broadcaster.py',
+        name='odom_tf_broadcaster',
         output='screen',
         parameters=[{
             'use_sim_time': LaunchConfiguration('use_sim_time'),
@@ -165,5 +164,5 @@ def generate_launch_description():
         robot_state_publisher,
         spawn_robot,
         gz_bridge,
-        gz_tf_bridge,
+        odom_tf_node,
     ])
