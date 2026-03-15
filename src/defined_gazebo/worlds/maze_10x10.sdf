@@ -15,6 +15,16 @@
 
   All walls: 0.20 m thick, 1.0 m tall.
   Robot spawned separately by gazebo.launch.py via ros_gz_sim create.
+
+  Running locally (world only, no robot):
+    Docker:   gz sim -r maze_10x10.sdf
+    macOS:    macOS cannot run server + GUI in one process.
+              Use two terminals (see https://github.com/gazebosim/gz-sim/issues/44):
+                Terminal 1:  gz sim -r -s maze_10x10.sdf
+                Terminal 2:  gz sim -g
+
+  Full stack with robot (requires ROS2 Jazzy):
+    ros2 launch defined_bringup simulation.launch.py x:=-3.0 y:=-3.0
 -->
 <sdf version="1.9">
   <world name="maze_10x10">
