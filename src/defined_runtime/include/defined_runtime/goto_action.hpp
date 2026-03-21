@@ -6,14 +6,13 @@
  * \brief BT.CPP action node that sends a NavigateToPose goal to Nav2.
  */
 
-#include <string>
-#include <unordered_map>
+#include <behaviortree_cpp/action_node.h>
 
+#include <nav2_msgs/action/navigate_to_pose.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
-#include <nav2_msgs/action/navigate_to_pose.hpp>
-
-#include <behaviortree_cpp/action_node.h>
+#include <string>
+#include <unordered_map>
 
 namespace defined_runtime {
 
@@ -47,8 +46,7 @@ class GoToAction : public BT::StatefulActionNode {
    * \param config BT node configuration (ports, blackboard).
    * \param node ROS2 node used for action client creation.
    */
-  GoToAction(const std::string& name, const BT::NodeConfig& config,
-             rclcpp::Node::SharedPtr node);
+  GoToAction(const std::string& name, const BT::NodeConfig& config, rclcpp::Node::SharedPtr node);
 
   /*!
    * \brief Declare the BT input/output ports.
@@ -75,17 +73,17 @@ class GoToAction : public BT::StatefulActionNode {
   static void ThetaToQuaternion(double theta, double& qz, double& qw);
 
  private:
-  rclcpp::Node::SharedPtr node_;  /*!< ROS2 node for action client creation. */
-  Client::SharedPtr client_;      /*!< Active action client. */
+  rclcpp::Node::SharedPtr node_; /*!< ROS2 node for action client creation. */
+  Client::SharedPtr client_;     /*!< Active action client. */
 
-  std::shared_future<GoalHandle::SharedPtr> goal_future_;        /*!< Goal send future. */
-  GoalHandle::SharedPtr goal_handle_;                            /*!< Active goal handle. */
-  std::shared_future<GoalHandle::WrappedResult> result_future_;  /*!< Result future. */
+  std::shared_future<GoalHandle::SharedPtr> goal_future_;       /*!< Goal send future. */
+  GoalHandle::SharedPtr goal_handle_;                           /*!< Active goal handle. */
+  std::shared_future<GoalHandle::WrappedResult> result_future_; /*!< Result future. */
 
-  rclcpp::Time start_time_;       /*!< Timestamp when navigation started. */
-  double timeout_sec_{60.0};      /*!< Navigation timeout in seconds. */
-  bool goal_accepted_{false};     /*!< Whether the goal has been accepted. */
-  bool result_pending_{false};    /*!< Whether we are waiting for a result. */
+  rclcpp::Time start_time_;    /*!< Timestamp when navigation started. */
+  double timeout_sec_{60.0};   /*!< Navigation timeout in seconds. */
+  bool goal_accepted_{false};  /*!< Whether the goal has been accepted. */
+  bool result_pending_{false}; /*!< Whether we are waiting for a result. */
 
   /*!< Action client cache keyed by server name. */
   std::unordered_map<std::string, Client::SharedPtr> client_cache_;

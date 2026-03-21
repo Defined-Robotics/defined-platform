@@ -6,9 +6,9 @@
  * \brief BT.CPP action node that waits for a specified duration.
  */
 
-#include <rclcpp/rclcpp.hpp>
-
 #include <behaviortree_cpp/action_node.h>
+
+#include <rclcpp/rclcpp.hpp>
 
 namespace defined_runtime {
 
@@ -31,8 +31,7 @@ class WaitAction : public BT::StatefulActionNode {
    * \param config BT node configuration (ports, blackboard).
    * \param node ROS2 node used for clock access.
    */
-  WaitAction(const std::string& name, const BT::NodeConfig& config,
-             rclcpp::Node::SharedPtr node);
+  WaitAction(const std::string& name, const BT::NodeConfig& config, rclcpp::Node::SharedPtr node);
 
   /*!
    * \brief Declare the BT input/output ports.
@@ -50,9 +49,9 @@ class WaitAction : public BT::StatefulActionNode {
   void onHalted() override;
 
  private:
-  rclcpp::Node::SharedPtr node_;   /*!< ROS2 node for clock access. */
-  rclcpp::Time start_time_;        /*!< Timestamp when the wait began. */
-  double duration_sec_{0.0};       /*!< Target wait duration in seconds. */
+  rclcpp::Node::SharedPtr node_; /*!< ROS2 node for clock access. */
+  rclcpp::Time start_time_;      /*!< Timestamp when the wait began. */
+  double duration_sec_{0.0};     /*!< Target wait duration in seconds. */
 };
 
 }  // namespace defined_runtime

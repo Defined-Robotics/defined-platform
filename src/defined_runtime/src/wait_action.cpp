@@ -1,3 +1,8 @@
+/*!
+ * \file wait_action.cpp
+ * \brief Implementation of WaitAction — pauses BT execution for a duration.
+ */
+
 #include "defined_runtime/wait_action.hpp"
 
 namespace defined_runtime {
@@ -20,8 +25,7 @@ BT::NodeStatus WaitAction::onStart() {
     return BT::NodeStatus::SUCCESS;
   }
   start_time_ = node_->now();
-  RCLCPP_INFO(node_->get_logger(), "WaitAction: waiting %.1f seconds",
-              duration_sec_);
+  RCLCPP_INFO(node_->get_logger(), "WaitAction: waiting %.1f seconds", duration_sec_);
   return BT::NodeStatus::RUNNING;
 }
 

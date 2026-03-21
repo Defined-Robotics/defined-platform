@@ -63,6 +63,66 @@ DISPLAY=host.docker.internal:1 docker compose -f docker/docker-compose.yml --pro
 DISPLAY=host.docker.internal:1 docker compose -f docker/docker-compose.yml --profile gui up sim-gui
 ```
 
+## 6. Run the BT Executor
+
+The BT executor loads a compiled BehaviorTree XML and drives the robot through it.
+
+### Launch alongside the sim
+
+Open a shell in the running sim container:
+
+```bash
+docker exec -it defined_sim bash
+source /opt/ros/jazzy/setup.bash
+source /ros2_ws/install/setup.bash
+```
+
+Then launch the executor with a task file:
+
+```bash
+ros2 launch defined_runtime bt_executor.launch.py \
+  bt_xml_path:=/ros2_ws/src/defined_runtime/test/fixtures/test_patrol.xml \
+  use_sim_time:=true
+```
+
+### Monitor task progress
+
+In another terminal inside the container:
+
+```bash
+ros2 topic echo /task_status
+```
+
+You will see JSON progress updates:
+
+```json
+{"step": "go_to_1_0", "status": "RUNNING", "current": 1, "total": 5, "progress": 20}
+```
+
+### Load a new task at runtime (no restart needed)
+
+```bash
+ros2 topic pub /task_command std_msgs/String \
+  "data: '/path/to/new_task.bt.xml'" --once
+```
+
+### Compile a task with defined-compiler
+
+From the host machine (requires `defined-compiler` installed):
+
+```bash
+defined-compile examples/patrol_task.yaml \
+  --rdf examples/defined_mvp.rdf.yaml \
+  --verbs-dir verb_library/ \
+  --output /tmp/patrol.bt.xml
+```
+
+Then copy into the container and load via `/task_command`.
+
+### Visualise the live tree in Groot2
+
+With `enable_groot:=true` (default), connect Groot2 to `localhost:1667`.
+
 ## Troubleshooting
 
 - **Named volumes cache stale builds**: `docker compose -f docker/docker-compose.yml down -v` to clear

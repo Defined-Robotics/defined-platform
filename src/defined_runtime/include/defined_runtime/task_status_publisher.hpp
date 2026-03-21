@@ -6,10 +6,9 @@
  * \brief Publishes JSON task-execution status to a ROS2 topic.
  */
 
-#include <string>
-
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
+#include <string>
 
 namespace defined_runtime {
 
@@ -28,8 +27,7 @@ class TaskStatusPublisher {
    * \param node  ROS2 node used for publisher creation.
    * \param topic Topic name to publish on (default: "/task_status").
    */
-  TaskStatusPublisher(rclcpp::Node::SharedPtr node,
-                      const std::string& topic = "/task_status");
+  TaskStatusPublisher(rclcpp::Node::SharedPtr node, const std::string& topic = "/task_status");
 
   /*!
    * \brief Publish a status update.
@@ -38,8 +36,8 @@ class TaskStatusPublisher {
    * \param current_step  Current step index (0-based).
    * \param total_steps   Total number of leaf action nodes in the tree.
    */
-  void Publish(const std::string& step_name, const std::string& status,
-               int current_step, int total_steps);
+  void Publish(const std::string& step_name, const std::string& status, int current_step,
+               int total_steps);
 
   /*!
    * \brief Build a JSON status string without publishing.
@@ -49,12 +47,11 @@ class TaskStatusPublisher {
    * \param total_steps   Total number of leaf action nodes.
    * \return JSON-formatted status string.
    */
-  static std::string ToJson(const std::string& step_name,
-                            const std::string& status,
+  static std::string ToJson(const std::string& step_name, const std::string& status,
                             int current_step, int total_steps);
 
  private:
-  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pub_;  /*!< ROS2 publisher. */
+  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pub_; /*!< ROS2 publisher. */
 };
 
 }  // namespace defined_runtime

@@ -6,13 +6,12 @@
  * \brief BT.CPP action node that publishes a report message to a ROS2 topic.
  */
 
-#include <string>
-#include <unordered_map>
+#include <behaviortree_cpp/action_node.h>
 
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
-
-#include <behaviortree_cpp/action_node.h>
+#include <string>
+#include <unordered_map>
 
 namespace defined_runtime {
 
@@ -39,8 +38,7 @@ class ReportAction : public BT::SyncActionNode {
    * \param config BT node configuration (ports, blackboard).
    * \param node ROS2 node used for publisher creation and logging.
    */
-  ReportAction(const std::string& name, const BT::NodeConfig& config,
-               rclcpp::Node::SharedPtr node);
+  ReportAction(const std::string& name, const BT::NodeConfig& config, rclcpp::Node::SharedPtr node);
 
   /*!
    * \brief Declare the BT input/output ports.
@@ -52,12 +50,10 @@ class ReportAction : public BT::SyncActionNode {
   BT::NodeStatus tick() override;
 
  private:
-  rclcpp::Node::SharedPtr node_;  /*!< ROS2 node for publishing and logging. */
+  rclcpp::Node::SharedPtr node_; /*!< ROS2 node for publishing and logging. */
 
   /*!< Publisher cache keyed by topic name. */
-  std::unordered_map<std::string,
-                     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr>
-      publishers_;
+  std::unordered_map<std::string, rclcpp::Publisher<std_msgs::msg::String>::SharedPtr> publishers_;
 };
 
 }  // namespace defined_runtime

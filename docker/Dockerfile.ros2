@@ -37,6 +37,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-jazzy-teleop-twist-keyboard \
     python3-colcon-common-extensions \
     libgl1-mesa-dri \
+    clang-tidy \
     && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user to run all ROS2 processes (C1)
