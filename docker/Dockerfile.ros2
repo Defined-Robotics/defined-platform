@@ -35,6 +35,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-jazzy-tf2-ros \
     ros-jazzy-tf2-tools \
     ros-jazzy-teleop-twist-keyboard \
+    ros-jazzy-turtlebot3 \
+    ros-jazzy-turtlebot3-msgs \
+    ros-jazzy-turtlebot3-simulations \
     python3-colcon-common-extensions \
     libgl1-mesa-dri \
     clang-tidy \

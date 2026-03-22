@@ -121,21 +121,42 @@ int main(int argc, char** argv) {
   while (rclcpp::ok()) {
     rclcpp::spin_some(node);
 
+    if (!tree_loaded || tree_done) {
+      // Publish IDLE heartbeat at ~1Hz so the CLI knows the executor is ready.
+      static int idle_counter = 0;
+      if (++idle_counter >= static_cast<int>(tick_rate)) {
+        status_pub->Publish("none", "IDLE", 0, 0);
+        idle_counter = 0;
+      }
+    }
+
     if (tree_loaded && !tree_done) {
       auto status = tree->tickOnce();
 
-      // Single visitor: find running node + count completed leaves.
+      // Find the currently running leaf and its index among all leaves.
+      // BT.CPP resets completed nodes to IDLE, so we can't count SUCCESS.
+      // Instead, find the running leaf's position — everything before it is done.
       std::string current_node_name = "unknown";
-      int completed = 0;
-      tree->applyVisitor([&current_node_name, &completed](const BT::TreeNode* tn) {
+      int running_leaf_index = -1;
+      int leaf_index = 0;
+      tree->applyVisitor([&](const BT::TreeNode* tn) {
+        bool is_leaf = (tn->type() == BT::NodeType::ACTION ||
+                        tn->type() == BT::NodeType::CONDITION);
         if (tn->status() == BT::NodeStatus::RUNNING) {
           current_node_name = tn->name();
+          if (is_leaf) {
+            running_leaf_index = leaf_index;
+          }
         }
-        if ((tn->type() == BT::NodeType::ACTION || tn->type() == BT::NodeType::CONDITION) &&
-            tn->status() == BT::NodeStatus::SUCCESS) {
-          completed++;
+        if (is_leaf) {
+          leaf_index++;
         }
       });
+      // completed = index of running leaf (everything before it is done).
+      // On final SUCCESS/FAILURE, no node is RUNNING so completed = total.
+      int completed = (status == BT::NodeStatus::RUNNING && running_leaf_index >= 0)
+                          ? running_leaf_index
+                          : (status == BT::NodeStatus::SUCCESS ? total_leaves : 0);
 
       std::string status_str;
       switch (status) {

@@ -322,9 +322,9 @@ local_costmap:
           marking:             true
           data_type:           "LaserScan"
           raytrace_max_range:  3.5
-          raytrace_min_range:  0.12
+          raytrace_min_range:  0.20
           obstacle_max_range:  3.5
-          obstacle_min_range:  0.12
+          obstacle_min_range:  0.20
       inflation_layer:
         plugin:             "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
@@ -346,6 +346,10 @@ global_costmap:
       footprint: "[ [0.145, 0.12], [0.145, -0.12], [-0.145, -0.12], [-0.145, 0.12] ]"
       resolution:          0.05
       track_unknown_space: true
+      width:  14
+      height: 14
+      origin_x: -7.0
+      origin_y: -7.0
       plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
       static_layer:
         plugin:                        "nav2_costmap_2d::StaticLayer"
@@ -361,9 +365,9 @@ global_costmap:
           marking:             true
           data_type:           "LaserScan"
           raytrace_max_range:  3.5
-          raytrace_min_range:  0.12
+          raytrace_min_range:  0.20
           obstacle_max_range:  3.5
-          obstacle_min_range:  0.12
+          obstacle_min_range:  0.20
       inflation_layer:
         plugin:             "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
