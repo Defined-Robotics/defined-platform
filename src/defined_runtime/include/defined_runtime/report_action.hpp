@@ -1,17 +1,17 @@
-#ifndef DEFINED_RUNTIME_REPORT_ACTION_HPP_
-#define DEFINED_RUNTIME_REPORT_ACTION_HPP_
+#ifndef DEFINED_RUNTIME_REPORT_ACTION_HPP
+#define DEFINED_RUNTIME_REPORT_ACTION_HPP
 
 /*!
  * \file report_action.hpp
  * \brief BT.CPP action node that publishes a report message to a ROS2 topic.
  */
 
-#include <behaviortree_cpp/action_node.h>
-
-#include <rclcpp/rclcpp.hpp>
-#include <std_msgs/msg/string.hpp>
 #include <string>
 #include <unordered_map>
+
+#include <behaviortree_cpp/action_node.h>
+#include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/string.hpp>
 
 namespace defined_runtime {
 
@@ -32,18 +32,10 @@ namespace defined_runtime {
  */
 class ReportAction : public BT::SyncActionNode {
  public:
-  /*!
-   * \brief Construct a ReportAction.
-   * \param name BT node instance name.
-   * \param config BT node configuration (ports, blackboard).
-   * \param node ROS2 node used for publisher creation and logging.
-   */
+  /*! \brief Construct a ReportAction. */
   ReportAction(const std::string& name, const BT::NodeConfig& config, rclcpp::Node::SharedPtr node);
 
-  /*!
-   * \brief Declare the BT input/output ports.
-   * \return Port list containing message, topic, level, and success ports.
-   */
+  /*! \brief Declare the BT input/output ports: message, topic, level, success. */
   static BT::PortsList providedPorts();
 
   /*! \copydoc BT::SyncActionNode::tick */
@@ -58,4 +50,4 @@ class ReportAction : public BT::SyncActionNode {
 
 }  // namespace defined_runtime
 
-#endif  // DEFINED_RUNTIME_REPORT_ACTION_HPP_
+#endif  // DEFINED_RUNTIME_REPORT_ACTION_HPP

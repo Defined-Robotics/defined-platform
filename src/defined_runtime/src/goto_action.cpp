@@ -3,11 +3,19 @@
  * \brief Implementation of GoToAction — sends NavigateToPose goals to Nav2.
  */
 
-#include "defined_runtime/goto_action.hpp"
+/*******************************************************************************
+ * Includes
+ ******************************************************************************/
 
 #include <cmath>
 
+#include "defined_runtime/goto_action.hpp"
+
 namespace defined_runtime {
+
+/*******************************************************************************
+ * Public Function Bodies
+ ******************************************************************************/
 
 GoToAction::GoToAction(const std::string& name, const BT::NodeConfig& config,
                        rclcpp::Node::SharedPtr node)
@@ -25,11 +33,25 @@ BT::PortsList GoToAction::providedPorts() {
   };
 }
 
+/*!
+ * \brief Convert a yaw angle to a unit quaternion (2-D rotation about Z).
+ *
+ * \param[in]  theta  Yaw angle in radians.
+ * \param[out] qz     Quaternion Z component.
+ * \param[out] qw     Quaternion W component.
+ */
 void GoToAction::ThetaToQuaternion(double theta, double& qz, double& qw) {
   qz = std::sin(theta / 2.0);
   qw = std::cos(theta / 2.0);
 }
 
+/*!
+ * \brief Get or create an action client for the given Nav2 action server.
+ *
+ * \param[in] server_name  Fully-qualified action server name.
+ *
+ * \retval Client::SharedPtr  Cached or newly created action client.
+ */
 GoToAction::Client::SharedPtr GoToAction::GetClient(const std::string& server_name) {
   auto it = client_cache_.find(server_name);
   if (it != client_cache_.end()) {
@@ -40,6 +62,16 @@ GoToAction::Client::SharedPtr GoToAction::GetClient(const std::string& server_na
   return client;
 }
 
+/*!
+ * \brief Read BT ports, acquire the action client, and send a NavigateToPose goal.
+ *
+ * \retval BT::NodeStatus::RUNNING  Goal sent successfully; waiting for acceptance.
+ * \retval BT::NodeStatus::FAILURE  Required port missing, action server unavailable,
+ *                                  or client creation failed.
+ *
+ * \warning The action server must be reachable within 5 seconds; otherwise the
+ *          node returns FAILURE immediately.
+ */
 BT::NodeStatus GoToAction::onStart() {
   double x, y, theta;
   std::string frame_id, server_name;
@@ -89,6 +121,17 @@ BT::NodeStatus GoToAction::onStart() {
   return BT::NodeStatus::RUNNING;
 }
 
+/*!
+ * \brief Poll goal acceptance and navigation result each BT tick.
+ *
+ * \retval BT::NodeStatus::RUNNING  Goal in flight; call again next tick.
+ * \retval BT::NodeStatus::SUCCESS  Navigation reached the target pose.
+ * \retval BT::NodeStatus::FAILURE  Timeout exceeded, goal rejected, or Nav2
+ *                                  reported ABORTED/CANCELED.
+ *
+ * \warning onStart() must have been called and returned RUNNING before this
+ *          method is invoked.
+ */
 BT::NodeStatus GoToAction::onRunning() {
   // Check timeout.
   if ((node_->now() - start_time_).seconds() > timeout_sec_) {
@@ -135,11 +178,27 @@ BT::NodeStatus GoToAction::onRunning() {
   return BT::NodeStatus::RUNNING;
 }
 
+/*!
+ * \brief Cancel the active goal and release the goal handle.
+ *
+ * \note Called by the BT.CPP executor when the tree halts this node mid-flight.
+ *       Safe to call even if no goal is active.
+ */
 void GoToAction::onHalted() {
   RCLCPP_INFO(node_->get_logger(), "GoToAction: halted");
   CancelGoal();
 }
 
+/*******************************************************************************
+ * Private Function Bodies
+ ******************************************************************************/
+
+/*!
+ * \brief Asynchronously cancel the active navigation goal, if any.
+ *
+ * \note No-op when \c goal_handle_ is null or the goal has not been accepted.
+ *       Cancel errors are logged as warnings and not propagated.
+ */
 void GoToAction::CancelGoal() {
   if (goal_handle_ && goal_accepted_) {
     try {

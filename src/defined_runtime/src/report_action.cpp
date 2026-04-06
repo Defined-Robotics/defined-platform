@@ -20,6 +20,15 @@ BT::PortsList ReportAction::providedPorts() {
   };
 }
 
+/*!
+ * \brief Publish the report message and log it at the configured severity.
+ *
+ * \retval BT::NodeStatus::SUCCESS  Message published and \c success output port set to true.
+ *
+ * \note The publisher is created on first use and cached for subsequent calls to the
+ *       same topic.  Port defaults apply when inputs are not explicitly set in the
+ *       BT XML (message = "checkpoint", topic = "/task_reports", level = "info").
+ */
 BT::NodeStatus ReportAction::tick() {
   std::string message, topic, level;
   getInput("message", message);

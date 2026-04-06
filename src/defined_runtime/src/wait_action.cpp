@@ -17,6 +17,14 @@ BT::PortsList WaitAction::providedPorts() {
   };
 }
 
+/*!
+ * \brief Read the duration port and start the wall-clock timer.
+ *
+ * \retval BT::NodeStatus::SUCCESS  Duration is zero or negative; completes immediately.
+ * \retval BT::NodeStatus::RUNNING  Timer started; onRunning() will poll elapsed time.
+ *
+ * \warning Throws \c BT::RuntimeError if the \c duration port is missing.
+ */
 BT::NodeStatus WaitAction::onStart() {
   if (!getInput("duration", duration_sec_)) {
     throw BT::RuntimeError("WaitAction: missing required input port [duration]");
@@ -29,6 +37,15 @@ BT::NodeStatus WaitAction::onStart() {
   return BT::NodeStatus::RUNNING;
 }
 
+/*!
+ * \brief Check whether the requested duration has elapsed.
+ *
+ * \retval BT::NodeStatus::SUCCESS  Elapsed time has met or exceeded \c duration_sec_.
+ * \retval BT::NodeStatus::RUNNING  Duration not yet reached; call again next tick.
+ *
+ * \warning onStart() must have been called and returned RUNNING before this
+ *          method is invoked.
+ */
 BT::NodeStatus WaitAction::onRunning() {
   auto elapsed = (node_->now() - start_time_).seconds();
   if (elapsed >= duration_sec_) {
@@ -38,6 +55,12 @@ BT::NodeStatus WaitAction::onRunning() {
   return BT::NodeStatus::RUNNING;
 }
 
+/*!
+ * \brief Log the halt event; no active resources to release.
+ *
+ * \note No cleanup is required because WaitAction holds no handles or
+ *       subscriptions that need explicit cancellation.
+ */
 void WaitAction::onHalted() {
   RCLCPP_INFO(node_->get_logger(), "WaitAction: halted");
 }

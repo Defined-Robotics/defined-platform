@@ -1,18 +1,18 @@
-#ifndef DEFINED_RUNTIME_GOTO_ACTION_HPP_
-#define DEFINED_RUNTIME_GOTO_ACTION_HPP_
+#ifndef DEFINED_RUNTIME_GOTO_ACTION_HPP
+#define DEFINED_RUNTIME_GOTO_ACTION_HPP
 
 /*!
  * \file goto_action.hpp
  * \brief BT.CPP action node that sends a NavigateToPose goal to Nav2.
  */
 
-#include <behaviortree_cpp/action_node.h>
+#include <string>
+#include <unordered_map>
 
+#include <behaviortree_cpp/action_node.h>
 #include <nav2_msgs/action/navigate_to_pose.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
-#include <string>
-#include <unordered_map>
 
 namespace defined_runtime {
 
@@ -40,19 +40,10 @@ class GoToAction : public BT::StatefulActionNode {
   using GoalHandle = rclcpp_action::ClientGoalHandle<NavigateToPose>;
   using Client = rclcpp_action::Client<NavigateToPose>;
 
-  /*!
-   * \brief Construct a GoToAction.
-   * \param name BT node instance name.
-   * \param config BT node configuration (ports, blackboard).
-   * \param node ROS2 node used for action client creation.
-   */
+  /*! \brief Construct a GoToAction. */
   GoToAction(const std::string& name, const BT::NodeConfig& config, rclcpp::Node::SharedPtr node);
 
-  /*!
-   * \brief Declare the BT input/output ports.
-   * \return Port list containing x, y, theta, timeout, frame_id,
-   *         server_name, and error_code ports.
-   */
+  /*! \brief Declare the BT input/output ports: x, y, theta, timeout, frame_id, server_name, error_code. */
   static BT::PortsList providedPorts();
 
   /*! \copydoc BT::StatefulActionNode::onStart */
@@ -64,12 +55,7 @@ class GoToAction : public BT::StatefulActionNode {
   /*! \copydoc BT::StatefulActionNode::onHalted */
   void onHalted() override;
 
-  /*!
-   * \brief Convert a yaw angle to a quaternion (2-D rotation about Z).
-   * \param[in]  theta Yaw angle in radians.
-   * \param[out] qz    Quaternion Z component.
-   * \param[out] qw    Quaternion W component.
-   */
+  /*! \brief Convert a yaw angle to a quaternion (2-D rotation about Z). */
   static void ThetaToQuaternion(double theta, double& qz, double& qw);
 
  private:
@@ -88,11 +74,7 @@ class GoToAction : public BT::StatefulActionNode {
   /*!< Action client cache keyed by server name. */
   std::unordered_map<std::string, Client::SharedPtr> client_cache_;
 
-  /*!
-   * \brief Get or create an action client for the given server.
-   * \param server_name Fully-qualified action server name.
-   * \return Shared pointer to the action client.
-   */
+  /*! \brief Get or create an action client for the given server. */
   Client::SharedPtr GetClient(const std::string& server_name);
 
   /*! \brief Cancel the active navigation goal, if any. */
@@ -101,4 +83,4 @@ class GoToAction : public BT::StatefulActionNode {
 
 }  // namespace defined_runtime
 
-#endif  // DEFINED_RUNTIME_GOTO_ACTION_HPP_
+#endif  // DEFINED_RUNTIME_GOTO_ACTION_HPP

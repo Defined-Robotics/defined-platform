@@ -1,5 +1,5 @@
-#ifndef DEFINED_RUNTIME_WAIT_ACTION_HPP_
-#define DEFINED_RUNTIME_WAIT_ACTION_HPP_
+#ifndef DEFINED_RUNTIME_WAIT_ACTION_HPP
+#define DEFINED_RUNTIME_WAIT_ACTION_HPP
 
 /*!
  * \file wait_action.hpp
@@ -25,18 +25,10 @@ namespace defined_runtime {
  */
 class WaitAction : public BT::StatefulActionNode {
  public:
-  /*!
-   * \brief Construct a WaitAction.
-   * \param name BT node instance name.
-   * \param config BT node configuration (ports, blackboard).
-   * \param node ROS2 node used for clock access.
-   */
+  /*! \brief Construct a WaitAction. */
   WaitAction(const std::string& name, const BT::NodeConfig& config, rclcpp::Node::SharedPtr node);
 
-  /*!
-   * \brief Declare the BT input/output ports.
-   * \return Port list containing the \c duration input port.
-   */
+  /*! \brief Declare the BT input/output port: duration. */
   static BT::PortsList providedPorts();
 
   /*! \copydoc BT::StatefulActionNode::onStart */
@@ -56,4 +48,4 @@ class WaitAction : public BT::StatefulActionNode {
 
 }  // namespace defined_runtime
 
-#endif  // DEFINED_RUNTIME_WAIT_ACTION_HPP_
+#endif  // DEFINED_RUNTIME_WAIT_ACTION_HPP

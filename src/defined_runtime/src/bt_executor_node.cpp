@@ -20,18 +20,26 @@
  * - `/task_status` (`std_msgs/String`) -- JSON progress updates.
  */
 
-#include <behaviortree_cpp/bt_factory.h>
-#include <behaviortree_cpp/loggers/groot2_publisher.h>
+/*******************************************************************************
+ * Includes
+ ******************************************************************************/
 
 #include <memory>
+#include <string>
+
+#include <behaviortree_cpp/bt_factory.h>
+#include <behaviortree_cpp/loggers/groot2_publisher.h>
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
-#include <string>
 
 #include "defined_runtime/goto_action.hpp"
 #include "defined_runtime/report_action.hpp"
 #include "defined_runtime/task_status_publisher.hpp"
 #include "defined_runtime/wait_action.hpp"
+
+/*******************************************************************************
+ * Public Function Bodies
+ ******************************************************************************/
 
 int main(int argc, char** argv) {
   rclcpp::init(argc, argv);

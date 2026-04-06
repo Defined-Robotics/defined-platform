@@ -1,14 +1,15 @@
-#ifndef DEFINED_RUNTIME_TASK_STATUS_PUBLISHER_HPP_
-#define DEFINED_RUNTIME_TASK_STATUS_PUBLISHER_HPP_
+#ifndef DEFINED_RUNTIME_TASK_STATUS_PUBLISHER_HPP
+#define DEFINED_RUNTIME_TASK_STATUS_PUBLISHER_HPP
 
 /*!
  * \file task_status_publisher.hpp
  * \brief Publishes JSON task-execution status to a ROS2 topic.
  */
 
+#include <string>
+
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
-#include <string>
 
 namespace defined_runtime {
 
@@ -22,31 +23,14 @@ namespace defined_runtime {
  */
 class TaskStatusPublisher {
  public:
-  /*!
-   * \brief Construct a TaskStatusPublisher.
-   * \param node  ROS2 node used for publisher creation.
-   * \param topic Topic name to publish on (default: "/task_status").
-   */
+  /*! \brief Construct a TaskStatusPublisher on the given node and topic. */
   TaskStatusPublisher(rclcpp::Node::SharedPtr node, const std::string& topic = "/task_status");
 
-  /*!
-   * \brief Publish a status update.
-   * \param step_name   Name of the currently executing BT node.
-   * \param status      Execution status string (RUNNING, SUCCESS, FAILURE).
-   * \param current_step  Current step index (0-based).
-   * \param total_steps   Total number of leaf action nodes in the tree.
-   */
+  /*! \brief Publish a JSON status update for the currently executing step. */
   void Publish(const std::string& step_name, const std::string& status, int current_step,
                int total_steps);
 
-  /*!
-   * \brief Build a JSON status string without publishing.
-   * \param step_name   Name of the currently executing BT node.
-   * \param status      Execution status string.
-   * \param current_step  Current step index.
-   * \param total_steps   Total number of leaf action nodes.
-   * \return JSON-formatted status string.
-   */
+  /*! \brief Build a JSON status string without publishing. */
   static std::string ToJson(const std::string& step_name, const std::string& status,
                             int current_step, int total_steps);
 
@@ -56,4 +40,4 @@ class TaskStatusPublisher {
 
 }  // namespace defined_runtime
 
-#endif  // DEFINED_RUNTIME_TASK_STATUS_PUBLISHER_HPP_
+#endif  // DEFINED_RUNTIME_TASK_STATUS_PUBLISHER_HPP
