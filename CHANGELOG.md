@@ -7,7 +7,7 @@ Release PRs (`release/vX.Y.Z`) promote `[Unreleased]` → the versioned heading.
 
 ---
 
-## [Unreleased]
+## [0.0.1] - 2026-04-06
 
 ### Added
 - Initial ROS2 Jazzy + Gz Sim Ionic workspace with five packages: `defined_bringup`, `defined_description`, `defined_gazebo`, `defined_navigation`, `defined_runtime`
