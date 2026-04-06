@@ -35,9 +35,8 @@ TRANSLATION POINTS (ROS2-specific, NOT in this file)
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Optional
 
 
 # ---------------------------------------------------------------------------
@@ -96,7 +95,7 @@ class RobotCommand:
     This type intentionally knows nothing about ROS2 message formats.
     """
     command_type: CommandType
-    goal: Optional[NavigationGoal] = None    # set when command_type == NAVIGATE_TO
+    goal: NavigationGoal | None = None        # set when command_type == NAVIGATE_TO
     wait_duration_s: float = 0.0             # set when command_type == WAIT
     task_id: str = ""                        # correlates command to a compiled task
 

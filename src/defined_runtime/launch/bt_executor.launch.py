@@ -1,3 +1,19 @@
+"""
+bt_executor.launch.py
+Defined Robotics — defined_runtime package
+
+Launches the BT executor node which loads a BehaviorTree XML and ticks it.
+
+Launch arguments:
+  bt_xml_path  : path to BT XML file to load at startup (default: '' = wait for /task_command)
+  tick_rate    : BT tick frequency in Hz (default: 100.0)
+  enable_groot : enable Groot2 ZMQ publisher on port 1667 (default: true)
+  use_sim_time : use simulation clock (default: true)
+
+Usage:
+  ros2 launch defined_runtime bt_executor.launch.py bt_xml_path:=/path/to/tree.xml
+"""
+
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription

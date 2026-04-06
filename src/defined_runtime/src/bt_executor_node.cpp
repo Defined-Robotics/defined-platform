@@ -70,6 +70,7 @@ int main(int argc, char** argv) {
   bool tree_loaded = false;
   bool tree_done = false;
   int total_leaves = 0;
+  int idle_counter = 0;
 
   // Lambda to load a tree from file.
   auto load_tree = [&](const std::string& xml_path) {
@@ -123,7 +124,6 @@ int main(int argc, char** argv) {
 
     if (!tree_loaded || tree_done) {
       // Publish IDLE heartbeat at ~1Hz so the CLI knows the executor is ready.
-      static int idle_counter = 0;
       if (++idle_counter >= static_cast<int>(tick_rate)) {
         status_pub->Publish("none", "IDLE", 0, 0);
         idle_counter = 0;
@@ -153,8 +153,9 @@ int main(int argc, char** argv) {
         }
       });
       // completed = index of running leaf (everything before it is done).
-      // On final SUCCESS/FAILURE, no node is RUNNING so completed = total.
-      int completed = (status == BT::NodeStatus::RUNNING && running_leaf_index >= 0)
+      // On final SUCCESS no node is RUNNING so completed = total.
+      // On FAILURE use running_leaf_index if available, else 0.
+      int completed = (running_leaf_index >= 0)
                           ? running_leaf_index
                           : (status == BT::NodeStatus::SUCCESS ? total_leaves : 0);
 
@@ -183,6 +184,7 @@ int main(int argc, char** argv) {
 
       if (tree_done) {
         groot_pub.reset();
+        idle_counter = 0;  // reset so heartbeat timing is fresh after tree completes
         RCLCPP_INFO(node->get_logger(), "Waiting for next /task_command");
       }
     }

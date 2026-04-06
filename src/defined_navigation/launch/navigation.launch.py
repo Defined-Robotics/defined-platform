@@ -2,7 +2,7 @@
 navigation.launch.py
 Defined Robotics — defined_navigation package
 
-MIDDLEWARE ADAPTER LAYER (ROS2 / Nav2 Humble)
+MIDDLEWARE ADAPTER LAYER (ROS2 / Nav2 Jazzy)
 ----------------------------------------------
 This file is ROS2-specific by design.  It lives inside the defined_platform
 workspace — the sole location where Nav2, costmaps, and navigation action

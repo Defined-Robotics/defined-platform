@@ -49,8 +49,8 @@ Boots the full simulation in three ordered stages:
     ws://localhost:9090
 
 Launch arguments (all optional — defaults produce a runnable sim):
-  world        : Gz Sim world file       (default: room_10x10.sdf)
-  map          : Nav2 map yaml           (default: room_10x10.yaml)
+  world        : Gz Sim world file       (default: maze_10x10.sdf)
+  map          : Nav2 map yaml           (default: maze_10x10.yaml)
   params_file  : Nav2 params yaml        (default: nav2_params.yaml)
   use_gui      : launch Gz GUI           (default: true; false for headless)
   use_sim_time : use /clock              (default: true)
@@ -236,7 +236,7 @@ def generate_launch_description():
 
 
     # ---------------------------------------------------------------------------
-    # Stage 4 — foxglove_bridge WebSocket (t = 2 s)
+    # Stage 4 — foxglove_bridge WebSocket (t = 3 s)
     # Provides the Foxglove Studio WebSocket bridge on port 8765.
     # Connect Foxglove Studio to ws://localhost:8765
     # ---------------------------------------------------------------------------

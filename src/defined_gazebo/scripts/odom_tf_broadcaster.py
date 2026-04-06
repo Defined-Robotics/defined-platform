@@ -6,6 +6,8 @@ Workaround for ros_gz_bridge Pose_V→TFMessage producing empty frame IDs
 and re-publishes the pose as a proper TF broadcast.
 """
 
+from __future__ import annotations
+
 import rclpy
 from rclpy.node import Node
 from nav_msgs.msg import Odometry
