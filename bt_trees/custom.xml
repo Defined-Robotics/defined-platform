@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+    <BehaviorTree ID="PatrolTask">
+        <Sequence name="PatrolTask_seq">
+            <RetryNode num_attempts="3">
+                <Action ID="GoTo" name="go_to_1.0_0.0" x="1.0" y="0.0" theta="0.0" frame_id="map" server_name="/navigate_to_pose" timeout="60.0" />
+            </RetryNode>
+            <Action ID="Report" name="report_arrived_at_wp1" message="arrived_at_wp1" topic="/task_reports" level="info" />
+            <Action ID="Wait" name="wait_2.0s" duration="2.0" />
+            <RetryNode num_attempts="3">
+                <Action ID="GoTo" name="go_to_2.0_1.5" x="2.0" y="1.5" theta="1.57" frame_id="map" server_name="/navigate_to_pose" timeout="60.0" />
+            </RetryNode>
+            <Action ID="Report" name="report_arrived_at_wp2" message="arrived_at_wp2" topic="/task_reports" level="info" />
+            <Action ID="Wait" name="wait_2.0s" duration="2.0" />
+            <RetryNode num_attempts="3">
+                <Action ID="GoTo" name="go_to_0.0_0.0" x="0.0" y="0.0" theta="0.0" frame_id="map" server_name="/navigate_to_pose" timeout="60.0" />
+            </RetryNode>
+            <Action ID="Report" name="report_patrol_complete" message="patrol_complete" topic="/task_reports" level="info" />
+        </Sequence>
+    </BehaviorTree>
+    <TreeNodesModel>
+        <Action ID="GoTo">
+            <input_port name="x" default="">Target X coordinate (meters)</input_port>
+            <input_port name="y" default="">Target Y coordinate (meters)</input_port>
+            <input_port name="theta" default="0.0">Target orientation (radians)</input_port>
+            <input_port name="timeout" default="60.0">Navigation timeout in seconds</input_port>
+            <input_port name="frame_id" default="map">Reference frame for goal coordinates</input_port>
+            <input_port name="server_name" default="/navigate_to_pose">Nav2 action server name</input_port>
+            <input_port name="retries" default="3">Number of retry attempts on failure</input_port>
+            <output_port name="error_code">Navigation error code</output_port>
+        </Action>
+        <Action ID="Report">
+            <input_port name="message" default="checkpoint">Report message</input_port>
+            <input_port name="topic" default="/task_reports">ROS topic to publish report to</input_port>
+            <input_port name="level" default="info">Report severity level (debug, info, warn, error)</input_port>
+            <output_port name="success">Whether report was published</output_port>
+        </Action>
+        <Action ID="Wait">
+            <input_port name="duration" default="">Wait duration in seconds</input_port>
+        </Action>
+    </TreeNodesModel>
+</root>

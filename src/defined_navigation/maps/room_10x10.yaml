@@ -1,0 +1,19 @@
+# room_10x10.yaml
+# Map metadata for nav2 map_server.
+#
+# Origin: bottom-left corner of the image in the map frame.
+# With a 200x200 image at 0.05 m/px and room centred at (0,0),
+# the bottom-left corner sits at (-5.0, -5.0) in world coordinates.
+#
+# Thresholds:
+#   occupied_thresh : pixels below this (normalised 0-1) are obstacles
+#   free_thresh     : pixels above this are free space
+#   Pixel value 0   (black) = occupied  → 0/255 = 0.00 < 0.65 → occupied
+#   Pixel value 254 (white) = free      → 254/255 = 0.996 > 0.25 → free
+
+image: room_10x10.pgm
+resolution: 0.05          # metres per pixel
+origin: [-5.0, -5.0, 0.0] # [x, y, yaw] of the bottom-left pixel
+negate: 0                  # 0 = dark pixels are occupied (standard)
+occupied_thresh: 0.65
+free_thresh: 0.25

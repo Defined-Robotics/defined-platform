@@ -1,0 +1,36 @@
+# Git history and metadata
+.git
+.gitignore
+.gitmodules
+
+# Secrets and local config
+.env
+.env.*
+*.pem
+*.key
+*.crt
+
+# Colcon build artefacts (handled by named volumes in compose)
+build/
+install/
+log/
+
+# IDE and editor config
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker config files (not needed in build context, but entrypoint.sh is needed)
+docker/Dockerfile.ros2
+docker/docker-compose.yml

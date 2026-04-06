@@ -3,11 +3,19 @@
 <package format="3">
   <name>defined_bringup</name>
   <version>0.0.1</version>
-  <description>Top-level launch orchestration for Defined Robotics</description>
+  <description>
+    Top-level launch orchestration for Defined Robotics.
+
+    Also provides platform_interface.py — the middleware-agnostic boundary
+    types (RobotCommand, RobotState, NavigationGoal) that defined_rdf,
+    defined_compiler, and the dashboard speak.  No ROS2 types appear in
+    that module; the ROS2 adapter nodes translate to/from it.
+  </description>
   <maintainer email="shreyas@definedrobotics.com">Shreyas Gokhale</maintainer>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
 
   <depend>defined_description</depend>
   <depend>defined_gazebo</depend>
