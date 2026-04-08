@@ -14,6 +14,7 @@ find_package(rclcpp_action REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(nav2_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
 find_package(behaviortree_cpp REQUIRED)
 
 # ---------------------------------------------------------------------------
@@ -25,6 +26,7 @@ add_library(defined_runtime_lib
   src/goto_action.cpp
   src/wait_action.cpp
   src/report_action.cpp
+  src/explore_action.cpp
   src/task_status_publisher.cpp
 )
 target_include_directories(defined_runtime_lib PUBLIC
@@ -37,6 +39,7 @@ ament_target_dependencies(defined_runtime_lib
   std_msgs
   geometry_msgs
   nav2_msgs
+  nav_msgs
   behaviortree_cpp
 )
 # Production builds: TESTABLE_STATIC functions keep static (internal) linkage.

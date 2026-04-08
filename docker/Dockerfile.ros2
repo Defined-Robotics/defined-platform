@@ -53,6 +53,15 @@ WORKDIR /ros2_ws
 
 # Copy source packages (as root, then fix ownership)
 COPY src/ /ros2_ws/src/
+
+# Clone m-explore-ros2 (frontier exploration) — only explore_lite, skip map_merge (Jazzy compat)
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && \
+    rm -rf /var/lib/apt/lists/* && \
+    git clone --depth 1 https://github.com/robo-friends/m-explore-ros2.git /tmp/m-explore && \
+    cp -r /tmp/m-explore/explore /ros2_ws/src/explore_lite && \
+    cp -r /tmp/m-explore/explore_lite_msgs /ros2_ws/src/explore_lite_msgs && \
+    rm -rf /tmp/m-explore
+
 RUN chown -R ros:ros /ros2_ws/src
 
 # Build workspace as non-root user

@@ -18,6 +18,7 @@ import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
+from launch.conditions import IfCondition
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
@@ -41,6 +42,10 @@ def generate_launch_description():
         'use_sim_time', default_value='true',
         description='Use simulation time')
 
+    run_explore_arg = DeclareLaunchArgument(
+        'run_explore', default_value='true',
+        description='Launch explore_lite for frontier exploration')
+
     bt_executor_node = Node(
         package='defined_runtime',
         executable='bt_executor',
@@ -57,10 +62,37 @@ def generate_launch_description():
         ],
     )
 
+    # explore_lite — frontier-based autonomous exploration (m-explore-ros2)
+    # Runs as a standalone node alongside the BT executor.
+    # The ExploreAction BT node controls it via /explore/resume.
+    explore_node = Node(
+        package='explore_lite',
+        executable='explore',
+        name='explore_node',
+        output='screen',
+        parameters=[{
+            'robot_base_frame': 'base_link',
+            'costmap_topic': 'global_costmap/costmap',
+            'costmap_updates_topic': 'global_costmap/costmap_updates',
+            'visualize': True,
+            'planner_frequency': 0.33,
+            'progress_timeout': 30.0,
+            'potential_scale': 3.0,
+            'orientation_scale': 0.0,
+            'gain_scale': 1.0,
+            'transform_tolerance': 0.3,
+            'min_frontier_size': 0.5,
+            'use_sim_time': LaunchConfiguration('use_sim_time'),
+        }],
+        condition=IfCondition(LaunchConfiguration('run_explore')),
+    )
+
     return LaunchDescription([
         bt_xml_path_arg,
         tick_rate_arg,
         enable_groot_arg,
         use_sim_time_arg,
+        run_explore_arg,
         bt_executor_node,
+        explore_node,
     ])
