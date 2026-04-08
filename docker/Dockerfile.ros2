@@ -55,12 +55,25 @@ WORKDIR /ros2_ws
 COPY src/ /ros2_ws/src/
 
 # Clone m-explore-ros2 (frontier exploration) — only explore_lite, skip map_merge (Jazzy compat)
+# Patches applied after copy:
+#   1. Add 'autostart' param (default false) — node stays idle until /explore/resume
+#   2. Clear frontier blacklist on resume() — prevents "All frontiers traversed" after restart
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && \
     rm -rf /var/lib/apt/lists/* && \
     git clone --depth 1 https://github.com/robo-friends/m-explore-ros2.git /tmp/m-explore && \
     cp -r /tmp/m-explore/explore /ros2_ws/src/explore_lite && \
     cp -r /tmp/m-explore/explore_lite_msgs /ros2_ws/src/explore_lite_msgs && \
-    rm -rf /tmp/m-explore
+    rm -rf /tmp/m-explore && \
+    # Patch 1: Add 'autostart' parameter (default false) to explore_lite \
+    sed -i '/declare_parameter<bool>("return_to_init", false);/a\  this->declare_parameter<bool>("autostart", false);' \
+        /ros2_ws/src/explore_lite/src/explore.cpp && \
+    sed -i '/get_parameter("robot_base_frame", robot_base_frame_);/a\  bool autostart_;\n  this->get_parameter("autostart", autostart_);' \
+        /ros2_ws/src/explore_lite/src/explore.cpp && \
+    # Patch 2: Wrap auto-start block in if(autostart_) — use python for multi-line replace \
+    python3 -c "f='/ros2_ws/src/explore_lite/src/explore.cpp'; s=open(f).read(); old='  // Start exploration right away\n  auto status_msg = explore_lite_msgs::msg::ExploreStatus();\n  status_msg.status = explore_lite_msgs::msg::ExploreStatus::EXPLORATION_STARTED;\n  status_pub_->publish(status_msg);\n  makePlan();'; new='  if (autostart_) {\n  // Start exploration right away\n  auto status_msg = explore_lite_msgs::msg::ExploreStatus();\n  status_msg.status = explore_lite_msgs::msg::ExploreStatus::EXPLORATION_STARTED;\n  status_pub_->publish(status_msg);\n  makePlan();\n  } else {\n    exploring_timer_->cancel();\n    RCLCPP_INFO(logger_, \"explore_lite started in paused mode\");\n  }'; open(f,'w').write(s.replace(old,new,1))" && \
+    # Patch 3: Clear frontier blacklist on resume() \
+    sed -i '/resuming_ = true;/a\  frontier_blacklist_.clear();' \
+        /ros2_ws/src/explore_lite/src/explore.cpp
 
 RUN chown -R ros:ros /ros2_ws/src
 

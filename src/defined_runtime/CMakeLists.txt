@@ -16,6 +16,7 @@ find_package(geometry_msgs REQUIRED)
 find_package(nav2_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(behaviortree_cpp REQUIRED)
+find_package(explore_lite_msgs REQUIRED)
 
 # ---------------------------------------------------------------------------
 # Shared library — contains all BT action nodes and the status publisher.
@@ -41,6 +42,7 @@ ament_target_dependencies(defined_runtime_lib
   nav2_msgs
   nav_msgs
   behaviortree_cpp
+  explore_lite_msgs
 )
 # Production builds: TESTABLE_STATIC functions keep static (internal) linkage.
 target_compile_definitions(defined_runtime_lib PRIVATE PRODUCTION_CODE=1)

@@ -16,6 +16,7 @@
   <depend>nav2_msgs</depend>
   <depend>nav_msgs</depend>
   <depend>behaviortree_cpp</depend>
+  <depend>explore_lite_msgs</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

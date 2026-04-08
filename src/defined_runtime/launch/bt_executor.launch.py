@@ -44,7 +44,7 @@ def generate_launch_description():
 
     run_explore_arg = DeclareLaunchArgument(
         'run_explore', default_value='true',
-        description='Launch explore_lite for frontier exploration')
+        description='Launch explore_lite for frontier exploration (starts paused, controlled via /explore/resume)')
 
     bt_executor_node = Node(
         package='defined_runtime',
@@ -64,7 +64,13 @@ def generate_launch_description():
 
     # explore_lite — frontier-based autonomous exploration (m-explore-ros2)
     # Runs as a standalone node alongside the BT executor.
+    # Patched at Docker build time with autostart=false (see Dockerfile.ros2).
     # The ExploreAction BT node controls it via /explore/resume.
+    #
+    # Parameter tuning notes (maze_10x10 environment):
+    #   planner_frequency 0.1  — replan every 10s; faster causes goal preemption thrash
+    #   progress_timeout  60   — seconds before blacklisting a stuck frontier
+    #   min_frontier_size  0.3 — metres; smaller catches narrow maze openings
     explore_node = Node(
         package='explore_lite',
         executable='explore',
@@ -75,13 +81,14 @@ def generate_launch_description():
             'costmap_topic': 'global_costmap/costmap',
             'costmap_updates_topic': 'global_costmap/costmap_updates',
             'visualize': True,
-            'planner_frequency': 0.33,
-            'progress_timeout': 30.0,
+            'planner_frequency': 0.1,
+            'progress_timeout': 60.0,
             'potential_scale': 3.0,
             'orientation_scale': 0.0,
             'gain_scale': 1.0,
             'transform_tolerance': 0.3,
-            'min_frontier_size': 0.5,
+            'min_frontier_size': 0.3,
+            'autostart': False,
             'use_sim_time': LaunchConfiguration('use_sim_time'),
         }],
         condition=IfCondition(LaunchConfiguration('run_explore')),

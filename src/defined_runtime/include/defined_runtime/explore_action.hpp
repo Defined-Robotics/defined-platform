@@ -5,16 +5,25 @@
  * \file explore_action.hpp
  * \brief BT.CPP action node that triggers and monitors autonomous exploration.
  *
- * Works with explore_lite (m-explore-ros2) running as a standalone node.
- * The ExploreAction publishes to /explore/resume to start exploration,
- * monitors the /map topic for coverage progress, and returns SUCCESS
- * when no new frontiers are found (exploration complete) or FAILURE
- * on timeout.
+ * Works with explore_lite (m-explore-ros2, patched) running as a standalone
+ * node launched alongside the BT executor via bt_executor.launch.py.
+ *
+ * explore_lite is patched at Docker build time (see Dockerfile.ros2) with:
+ *   - autostart=false: starts paused, waits for /explore/resume
+ *   - blacklist clear on resume(): fresh frontier search each activation
+ *
+ * Completion is detected via two signals (whichever fires first):
+ *   1. /explore/status → EXPLORATION_COMPLETE (explore_lite's own signal)
+ *   2. /map staleness — no new cells for stale_threshold_sec_ (fallback)
+ *
+ * \see bt_executor.launch.py for explore_lite parameter tuning
+ * \see Dockerfile.ros2 for the sed/python patches applied to explore_lite
  */
 
 #include <string>
 
 #include <behaviortree_cpp/action_node.h>
+#include <explore_lite_msgs/msg/explore_status.hpp>
 #include <nav_msgs/msg/occupancy_grid.hpp>
 #include <std_msgs/msg/bool.hpp>
 #include <rclcpp/rclcpp.hpp>
@@ -35,6 +44,13 @@ namespace defined_runtime {
  * | Direction | Name    | Type   | Default | Description                    |
  * |-----------|---------|--------|---------|--------------------------------|
  * | Input     | timeout | double | 300.0   | Max exploration time (seconds) |
+ *
+ * \par ROS2 Topics
+ * | Direction | Topic             | Type                  | QoS              |
+ * |-----------|-------------------|-----------------------|------------------|
+ * | Pub       | /explore/resume   | std_msgs/Bool         | transient_local  |
+ * | Sub       | /explore/status   | ExploreStatus         | transient_local  |
+ * | Sub       | /map              | OccupancyGrid         | transient_local  |
  */
 class ExploreAction : public BT::StatefulActionNode {
  public:
@@ -51,6 +67,7 @@ class ExploreAction : public BT::StatefulActionNode {
   rclcpp::Node::SharedPtr node_;
   rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr resume_pub_;
   rclcpp::Subscription<nav_msgs::msg::OccupancyGrid>::SharedPtr map_sub_;
+  rclcpp::Subscription<explore_lite_msgs::msg::ExploreStatus>::SharedPtr status_sub_;
 
   rclcpp::Time start_time_;
   double timeout_sec_{300.0};
@@ -60,9 +77,12 @@ class ExploreAction : public BT::StatefulActionNode {
   rclcpp::Time last_map_change_;    /*!< Time when map last changed significantly */
   double stale_threshold_sec_{30.0}; /*!< Seconds of no map change → exploration done */
   bool map_received_{false};
+  bool explore_done_{false};    /*!< Set when explore_lite reports EXPLORATION_COMPLETE */
+  bool explore_started_{false}; /*!< Set when explore_lite confirms it's actively exploring */
 
   void PublishResume(bool resume);
   void OnMapReceived(const nav_msgs::msg::OccupancyGrid::SharedPtr msg);
+  void OnExploreStatus(const explore_lite_msgs::msg::ExploreStatus::SharedPtr msg);
 };
 
 }  // namespace defined_runtime
