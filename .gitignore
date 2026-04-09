@@ -11,3 +11,6 @@ cmake-build-debug/
 
 # OS
 .DS_Store
+
+# SLAM evaluation artefacts
+slam_eval_maps/
