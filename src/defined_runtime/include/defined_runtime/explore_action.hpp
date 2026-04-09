@@ -41,9 +41,10 @@ namespace defined_runtime {
  *   - onHalted: publishes False to /explore/resume to stop exploration
  *
  * \par BT Ports
- * | Direction | Name    | Type   | Default | Description                    |
- * |-----------|---------|--------|---------|--------------------------------|
- * | Input     | timeout | double | 300.0   | Max exploration time (seconds) |
+ * | Direction | Name             | Type   | Default | Description                                      |
+ * |-----------|------------------|--------|---------|--------------------------------------------------|
+ * | Input     | timeout          | double | 300.0   | Max exploration time (seconds)                   |
+ * | Input     | stale_threshold  | double | 30.0    | Seconds of no map change → exploration complete  |
  *
  * \par ROS2 Topics
  * | Direction | Topic             | Type                  | QoS              |

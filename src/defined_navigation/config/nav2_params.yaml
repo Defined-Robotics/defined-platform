@@ -254,7 +254,7 @@ bt_navigator:
     robot_base_frame:  base_footprint
     odom_topic:        /odom
     bt_loop_duration:      10    # ms per BT tick
-    default_server_timeout: 20   # s — server call timeout
+    default_server_timeout: 60   # s — server call timeout (increased: SLAM costmap resizes can delay planner acks)
 
     # In Jazzy, Nav2 auto-discovers BT node plugins — no explicit plugin_lib_names needed.
     # Default BT XMLs are resolved automatically; only override if using custom trees.

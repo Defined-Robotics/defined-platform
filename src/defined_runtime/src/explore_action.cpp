@@ -30,11 +30,13 @@ ExploreAction::ExploreAction(const std::string& name, const BT::NodeConfig& conf
 BT::PortsList ExploreAction::providedPorts() {
   return {
       BT::InputPort<double>("timeout", 300.0, "Max exploration time (seconds)"),
+      BT::InputPort<double>("stale_threshold", 30.0, "Seconds of no map change → exploration complete"),
   };
 }
 
 BT::NodeStatus ExploreAction::onStart() {
   getInput("timeout", timeout_sec_);
+  getInput("stale_threshold", stale_threshold_sec_);
 
   RCLCPP_INFO(node_->get_logger(), "ExploreAction: starting frontier exploration (timeout=%.0fs)",
               timeout_sec_);

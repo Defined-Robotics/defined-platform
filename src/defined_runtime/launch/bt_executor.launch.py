@@ -46,6 +46,10 @@ def generate_launch_description():
         'run_explore', default_value='true',
         description='Launch explore_lite for frontier exploration (starts paused, controlled via /explore/resume)')
 
+    progress_timeout_arg = DeclareLaunchArgument(
+        'progress_timeout', default_value='60.0',
+        description='Seconds before explore_lite blacklists a stuck frontier')
+
     bt_executor_node = Node(
         package='defined_runtime',
         executable='bt_executor',
@@ -82,7 +86,7 @@ def generate_launch_description():
             'costmap_updates_topic': 'global_costmap/costmap_updates',
             'visualize': True,
             'planner_frequency': 0.1,
-            'progress_timeout': 60.0,
+            'progress_timeout': LaunchConfiguration('progress_timeout'),
             'potential_scale': 3.0,
             'orientation_scale': 0.0,
             'gain_scale': 1.0,
@@ -100,6 +104,7 @@ def generate_launch_description():
         enable_groot_arg,
         use_sim_time_arg,
         run_explore_arg,
+        progress_timeout_arg,
         bt_executor_node,
         explore_node,
     ])
