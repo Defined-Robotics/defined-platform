@@ -56,6 +56,7 @@ Launch arguments (all optional — defaults produce a runnable sim):
   use_sim_time : use /clock              (default: true)
   autostart    : auto-activate Nav2      (default: true)
   x, y, z, yaw: robot spawn pose
+  run_explore  : launch explore_lite with BT executor (default: false; required for Explore verb)
 
 Usage (host, ROS2 Jazzy sourced):
   ros2 launch defined_bringup simulation.launch.py
@@ -271,6 +272,11 @@ def generate_launch_description():
         default_value='',
         description='Path to BT XML file to auto-execute (empty = wait for /task_command)',
     )
+    run_explore_arg = DeclareLaunchArgument(
+        'run_explore',
+        default_value='false',
+        description='Launch explore_lite alongside the BT executor (required for Explore verb)',
+    )
 
     bt_executor_launch = TimerAction(
         period=15.0,
@@ -286,6 +292,7 @@ def generate_launch_description():
                 launch_arguments={
                     'bt_xml_path':   LaunchConfiguration('run_task'),
                     'use_sim_time':  LaunchConfiguration('use_sim_time'),
+                    'run_explore':   LaunchConfiguration('run_explore'),
                 }.items(),
                 condition=IfCondition(LaunchConfiguration('run_bt')),
             )
@@ -307,6 +314,7 @@ def generate_launch_description():
         yaw_arg,
         run_bt_arg,
         run_task_arg,
+        run_explore_arg,
         # Stages
         gazebo_launch,
         navigation_launch,
