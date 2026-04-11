@@ -32,6 +32,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
 
+#include "defined_runtime/capture_image_action.hpp"
 #include "defined_runtime/explore_action.hpp"
 #include "defined_runtime/goto_action.hpp"
 #include "defined_runtime/report_action.hpp"
@@ -73,7 +74,12 @@ int main(int argc, char** argv) {
         return std::make_unique<defined_runtime::ExploreAction>(name, cfg, node);
       });
 
-  RCLCPP_INFO(node->get_logger(), "Registered BT nodes: GoTo, Wait, Report, Explore");
+  factory.registerBuilder<defined_runtime::CaptureImageAction>(
+      "CaptureImage", [node](const std::string& name, const BT::NodeConfig& cfg) {
+        return std::make_unique<defined_runtime::CaptureImageAction>(name, cfg, node);
+      });
+
+  RCLCPP_INFO(node->get_logger(), "Registered BT nodes: GoTo, Wait, Report, Explore, CaptureImage");
 
   // Task status publisher.
   auto status_pub = std::make_shared<defined_runtime::TaskStatusPublisher>(node);

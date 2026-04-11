@@ -17,6 +17,7 @@ find_package(nav2_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(behaviortree_cpp REQUIRED)
 find_package(explore_lite_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 
 # ---------------------------------------------------------------------------
 # Shared library — contains all BT action nodes and the status publisher.
@@ -28,6 +29,7 @@ add_library(defined_runtime_lib
   src/wait_action.cpp
   src/report_action.cpp
   src/explore_action.cpp
+  src/capture_image_action.cpp
   src/task_status_publisher.cpp
 )
 target_include_directories(defined_runtime_lib PUBLIC
@@ -43,6 +45,7 @@ ament_target_dependencies(defined_runtime_lib
   nav_msgs
   behaviortree_cpp
   explore_lite_msgs
+  sensor_msgs
 )
 # Production builds: TESTABLE_STATIC functions keep static (internal) linkage.
 target_compile_definitions(defined_runtime_lib PRIVATE PRODUCTION_CODE=1)
@@ -91,6 +94,10 @@ if(BUILD_TESTING)
   ament_add_gtest(test_explore_action test/test_explore_action.cpp)
   target_link_libraries(test_explore_action defined_runtime_lib)
   target_compile_definitions(test_explore_action PRIVATE PRODUCTION_CODE=0)
+
+  ament_add_gtest(test_capture_image_action test/test_capture_image_action.cpp)
+  target_link_libraries(test_capture_image_action defined_runtime_lib)
+  target_compile_definitions(test_capture_image_action PRIVATE PRODUCTION_CODE=0)
 
   install(DIRECTORY test/fixtures/ DESTINATION share/${PROJECT_NAME}/test/fixtures)
 endif()
