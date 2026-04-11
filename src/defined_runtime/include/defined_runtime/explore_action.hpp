@@ -17,16 +17,18 @@
  *   2. /map staleness — no new cells for stale_threshold_sec_ (fallback)
  *
  * \see bt_executor.launch.py for explore_lite parameter tuning
- * \see Dockerfile.ros2 for the sed/python patches applied to explore_lite
+ * \see Dockerfile.ros2 for the patches applied to explore_lite
  */
 
+#include <atomic>
+#include <mutex>
 #include <string>
 
 #include <behaviortree_cpp/action_node.h>
 #include <explore_lite_msgs/msg/explore_status.hpp>
 #include <nav_msgs/msg/occupancy_grid.hpp>
-#include <std_msgs/msg/bool.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/bool.hpp>
 
 namespace defined_runtime {
 
@@ -61,6 +63,11 @@ class ExploreAction : public BT::StatefulActionNode {
   static BT::PortsList providedPorts();
 
   BT::NodeStatus onStart() override;
+
+  /*!
+   * \warning onStart() must have been called and returned RUNNING before this
+   *          method is invoked.
+   */
   BT::NodeStatus onRunning() override;
   void onHalted() override;
 
@@ -71,17 +78,22 @@ class ExploreAction : public BT::StatefulActionNode {
   rclcpp::Subscription<explore_lite_msgs::msg::ExploreStatus>::SharedPtr status_sub_;
 
   rclcpp::Time start_time_;
+  rclcpp::Time last_resume_pub_time_;  /*!< Time of last /explore/resume publish (rate-limiting) */
   double timeout_sec_{300.0};
+  double stale_threshold_sec_{30.0};  /*!< Seconds of no map change → exploration done */
 
-  // Track map changes to detect exploration completion
-  int last_known_cells_{0};         /*!< Count of known (non-unknown) cells in last map */
-  rclcpp::Time last_map_change_;    /*!< Time when map last changed significantly */
-  double stale_threshold_sec_{30.0}; /*!< Seconds of no map change → exploration done */
-  bool map_received_{false};
-  bool explore_done_{false};    /*!< Set when explore_lite reports EXPLORATION_COMPLETE */
-  bool explore_started_{false}; /*!< Set when explore_lite confirms it's actively exploring */
+  // Shared state between the BT tick thread (onRunning) and ROS2 subscription
+  // callbacks (OnMapReceived, OnExploreStatus). Atomics for cheap scalar flags;
+  // map_time_mutex_ guards last_map_change_ which is a non-trivial type.
+  mutable std::mutex map_time_mutex_;
+  rclcpp::Time last_map_change_;                 /*!< Time of last significant map update */
+  std::atomic<int> last_known_cells_{0};         /*!< Known (non-unknown) cell count in last map */
+  std::atomic<bool> map_received_{false};
+  std::atomic<bool> explore_done_{false};        /*!< Set when explore_lite reports EXPLORATION_COMPLETE */
+  std::atomic<bool> explore_started_{false};     /*!< Set when explore_lite confirms it's actively exploring */
 
   void PublishResume(bool resume);
+  void Cleanup();  /*!< Resets publisher and subscriptions; safe to call from any exit path */
   void OnMapReceived(const nav_msgs::msg::OccupancyGrid::SharedPtr msg);
   void OnExploreStatus(const explore_lite_msgs::msg::ExploreStatus::SharedPtr msg);
 };

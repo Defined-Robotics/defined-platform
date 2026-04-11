@@ -43,7 +43,7 @@ def generate_launch_description():
         description='Use simulation time')
 
     run_explore_arg = DeclareLaunchArgument(
-        'run_explore', default_value='true',
+        'run_explore', default_value='false',
         description='Launch explore_lite for frontier exploration (starts paused, controlled via /explore/resume)')
 
     progress_timeout_arg = DeclareLaunchArgument(
@@ -70,31 +70,21 @@ def generate_launch_description():
     # Runs as a standalone node alongside the BT executor.
     # Patched at Docker build time with autostart=false (see Dockerfile.ros2).
     # The ExploreAction BT node controls it via /explore/resume.
-    #
-    # Parameter tuning notes (maze_10x10 environment):
-    #   planner_frequency 0.1  — replan every 10s; faster causes goal preemption thrash
-    #   progress_timeout  60   — seconds before blacklisting a stuck frontier
-    #   min_frontier_size  0.3 — metres; smaller catches narrow maze openings
+    # Static parameters live in config/explore_params.yaml; progress_timeout
+    # and use_sim_time are overridden here as they vary per environment.
+    explore_params_file = os.path.join(pkg_runtime, 'config', 'explore_params.yaml')
     explore_node = Node(
         package='explore_lite',
         executable='explore',
         name='explore_node',
         output='screen',
-        parameters=[{
-            'robot_base_frame': 'base_link',
-            'costmap_topic': 'global_costmap/costmap',
-            'costmap_updates_topic': 'global_costmap/costmap_updates',
-            'visualize': True,
-            'planner_frequency': 0.1,
-            'progress_timeout': LaunchConfiguration('progress_timeout'),
-            'potential_scale': 3.0,
-            'orientation_scale': 0.0,
-            'gain_scale': 1.0,
-            'transform_tolerance': 0.3,
-            'min_frontier_size': 0.3,
-            'autostart': False,
-            'use_sim_time': LaunchConfiguration('use_sim_time'),
-        }],
+        parameters=[
+            explore_params_file,
+            {
+                'progress_timeout': LaunchConfiguration('progress_timeout'),
+                'use_sim_time': LaunchConfiguration('use_sim_time'),
+            },
+        ],
         condition=IfCondition(LaunchConfiguration('run_explore')),
     )
 

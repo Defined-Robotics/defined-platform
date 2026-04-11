@@ -88,6 +88,10 @@ if(BUILD_TESTING)
   target_link_libraries(test_bt_executor_integration defined_runtime_lib)
   target_compile_definitions(test_bt_executor_integration PRIVATE PRODUCTION_CODE=0)
 
+  ament_add_gtest(test_explore_action test/test_explore_action.cpp)
+  target_link_libraries(test_explore_action defined_runtime_lib)
+  target_compile_definitions(test_explore_action PRIVATE PRODUCTION_CODE=0)
+
   install(DIRECTORY test/fixtures/ DESTINATION share/${PROJECT_NAME}/test/fixtures)
 endif()
 

@@ -2,7 +2,7 @@
  * \file bt_executor_node.cpp
  * \brief BT Executor Node -- loads compiled BehaviorTree XML and ticks the tree.
  *
- * Registers custom BT action nodes (GoTo, Wait, Report), ticks the tree
+ * Registers custom BT action nodes (GoTo, Wait, Report, Explore), ticks the tree
  * at a configurable rate, and publishes task status to `/task_status`.
  * New tasks can be loaded at runtime via `/task_command` (`std_msgs/String`).
  *
