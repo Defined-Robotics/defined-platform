@@ -53,6 +53,41 @@ WORKDIR /ros2_ws
 
 # Copy source packages (as root, then fix ownership)
 COPY src/ /ros2_ws/src/
+
+# Clone m-explore-ros2 (frontier exploration) — only explore_lite, skip map_merge (Jazzy compat)
+# Pinned to a specific commit for reproducible builds. To upgrade: run
+#   git ls-remote https://github.com/robo-friends/m-explore-ros2.git HEAD
+# update MEXPLORE_SHA below, re-verify the patches still apply, and rebuild.
+#
+# Patches applied after copy:
+#   1. Add 'autostart' param (default false) — node stays idle until /explore/resume
+#   2. Wrap auto-start block in if(autostart_) — skip auto-navigation when paused
+#   3. Clear frontier blacklist on resume() — prevents "All frontiers traversed" after restart
+ARG MEXPLORE_SHA=86742bff6edd53fcce16f99dbc8c06ed5d7eed22
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates git && \
+    rm -rf /var/lib/apt/lists/* && \
+    git clone https://github.com/robo-friends/m-explore-ros2.git /tmp/m-explore && \
+    git -C /tmp/m-explore checkout ${MEXPLORE_SHA} && \
+    cp -r /tmp/m-explore/explore /ros2_ws/src/explore_lite && \
+    cp -r /tmp/m-explore/explore_lite_msgs /ros2_ws/src/explore_lite_msgs && \
+    rm -rf /tmp/m-explore && \
+    # Patch 1: Add 'autostart' parameter (default false) to explore_lite \
+    sed -i '/declare_parameter<bool>("return_to_init", false);/a\  this->declare_parameter<bool>("autostart", false);' \
+        /ros2_ws/src/explore_lite/src/explore.cpp && \
+    grep -q 'declare_parameter<bool>("autostart", false)' /ros2_ws/src/explore_lite/src/explore.cpp \
+        || { echo "ERROR: Patch 1a (autostart declaration) did not apply"; exit 1; } && \
+    sed -i '/get_parameter("robot_base_frame", robot_base_frame_);/a\  bool autostart_;\n  this->get_parameter("autostart", autostart_);' \
+        /ros2_ws/src/explore_lite/src/explore.cpp && \
+    grep -q 'get_parameter("autostart", autostart_)' /ros2_ws/src/explore_lite/src/explore.cpp \
+        || { echo "ERROR: Patch 1b (autostart read) did not apply"; exit 1; } && \
+    # Patch 2: Wrap auto-start block in if(autostart_) — use python for multi-line replace \
+    python3 -c "f='/ros2_ws/src/explore_lite/src/explore.cpp'; s=open(f).read(); old='  // Start exploration right away\n  auto status_msg = explore_lite_msgs::msg::ExploreStatus();\n  status_msg.status = explore_lite_msgs::msg::ExploreStatus::EXPLORATION_STARTED;\n  status_pub_->publish(status_msg);\n  makePlan();'; new='  if (autostart_) {\n  // Start exploration right away\n  auto status_msg = explore_lite_msgs::msg::ExploreStatus();\n  status_msg.status = explore_lite_msgs::msg::ExploreStatus::EXPLORATION_STARTED;\n  status_pub_->publish(status_msg);\n  makePlan();\n  } else {\n    exploring_timer_->cancel();\n    RCLCPP_INFO(logger_, \"explore_lite started in paused mode\");\n  }'; result = s.replace(old, new, 1); assert result != s, 'ERROR: Patch 2 (autostart guard) did not apply — upstream source may have changed'; open(f,'w').write(result)" && \
+    # Patch 3: Clear frontier blacklist on resume() \
+    sed -i '/resuming_ = true;/a\  frontier_blacklist_.clear();' \
+        /ros2_ws/src/explore_lite/src/explore.cpp && \
+    grep -q 'frontier_blacklist_.clear()' /ros2_ws/src/explore_lite/src/explore.cpp \
+        || { echo "ERROR: Patch 3 (blacklist clear) did not apply"; exit 1; }
+
 RUN chown -R ros:ros /ros2_ws/src
 
 # Build workspace as non-root user

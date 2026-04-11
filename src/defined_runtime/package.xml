@@ -14,7 +14,12 @@
   <depend>std_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>nav2_msgs</depend>
+  <depend>nav_msgs</depend>
   <depend>behaviortree_cpp</depend>
+  <depend>explore_lite_msgs</depend>
+  <!-- explore_lite itself has no rosdep key — it is built from source inside the
+       Docker image (see Dockerfile.ros2). Non-Docker deployments must clone and
+       build https://github.com/robo-friends/m-explore-ros2 manually. -->
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

@@ -14,7 +14,9 @@ find_package(rclcpp_action REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(nav2_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
 find_package(behaviortree_cpp REQUIRED)
+find_package(explore_lite_msgs REQUIRED)
 
 # ---------------------------------------------------------------------------
 # Shared library — contains all BT action nodes and the status publisher.
@@ -25,6 +27,7 @@ add_library(defined_runtime_lib
   src/goto_action.cpp
   src/wait_action.cpp
   src/report_action.cpp
+  src/explore_action.cpp
   src/task_status_publisher.cpp
 )
 target_include_directories(defined_runtime_lib PUBLIC
@@ -37,7 +40,9 @@ ament_target_dependencies(defined_runtime_lib
   std_msgs
   geometry_msgs
   nav2_msgs
+  nav_msgs
   behaviortree_cpp
+  explore_lite_msgs
 )
 # Production builds: TESTABLE_STATIC functions keep static (internal) linkage.
 target_compile_definitions(defined_runtime_lib PRIVATE PRODUCTION_CODE=1)
@@ -82,6 +87,10 @@ if(BUILD_TESTING)
   ament_add_gtest(test_bt_executor_integration test/test_bt_executor_integration.cpp)
   target_link_libraries(test_bt_executor_integration defined_runtime_lib)
   target_compile_definitions(test_bt_executor_integration PRIVATE PRODUCTION_CODE=0)
+
+  ament_add_gtest(test_explore_action test/test_explore_action.cpp)
+  target_link_libraries(test_explore_action defined_runtime_lib)
+  target_compile_definitions(test_explore_action PRIVATE PRODUCTION_CODE=0)
 
   install(DIRECTORY test/fixtures/ DESTINATION share/${PROJECT_NAME}/test/fixtures)
 endif()

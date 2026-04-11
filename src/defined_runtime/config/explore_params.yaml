@@ -1,0 +1,26 @@
+# explore_lite (m-explore-ros2) parameters for defined_runtime.
+#
+# explore_lite is built from source inside the Docker image (see Dockerfile.ros2)
+# and patched to start in paused mode (autostart: false). The ExploreAction BT
+# node controls it via /explore/resume.
+#
+# progress_timeout and use_sim_time are not listed here — they are passed as
+# launch arguments from bt_executor.launch.py so they can vary per environment.
+#
+# Tuning notes (maze_10x10 environment):
+#   planner_frequency: 0.1  — replan every 10s; faster causes goal preemption thrash
+#   min_frontier_size: 0.5  — metres; avoids targeting tiny corner/wall openings that
+#                             cause the robot to approach walls and get stuck
+explore_node:
+  ros__parameters:
+    robot_base_frame: base_link
+    costmap_topic: global_costmap/costmap
+    costmap_updates_topic: global_costmap/costmap_updates
+    visualize: true
+    planner_frequency: 0.1
+    potential_scale: 3.0
+    orientation_scale: 0.0
+    gain_scale: 1.0
+    transform_tolerance: 0.3
+    min_frontier_size: 0.5
+    autostart: false
