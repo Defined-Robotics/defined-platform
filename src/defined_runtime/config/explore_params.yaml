@@ -9,7 +9,8 @@
 #
 # Tuning notes (maze_10x10 environment):
 #   planner_frequency: 0.1  — replan every 10s; faster causes goal preemption thrash
-#   min_frontier_size: 0.3  — metres; smaller catches narrow maze openings
+#   min_frontier_size: 0.5  — metres; avoids targeting tiny corner/wall openings that
+#                             cause the robot to approach walls and get stuck
 explore_node:
   ros__parameters:
     robot_base_frame: base_link
@@ -21,5 +22,5 @@ explore_node:
     orientation_scale: 0.0
     gain_scale: 1.0
     transform_tolerance: 0.3
-    min_frontier_size: 0.3
+    min_frontier_size: 0.5
     autostart: false
