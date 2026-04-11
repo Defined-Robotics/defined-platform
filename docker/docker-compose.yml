@@ -81,7 +81,7 @@ services:
     # Default: headless (no Gz GUI), maze world.
     # Override for GUI: docker compose run sim ros2 launch ... use_gui:=true
     command: >
-      ros2 launch defined_bringup simulation.launch.py use_gui:=false use_slam:=true run_bt:=true
+      ros2 launch defined_bringup simulation.launch.py use_gui:=false use_slam:=true run_bt:=true run_explore:=true
 
   # ---------------------------------------------------------------------------
   # rviz: Optional RViz2 visualisation
