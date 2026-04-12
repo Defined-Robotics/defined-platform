@@ -125,7 +125,20 @@ int main(int argc, char** argv) {
   // Subscribe to /task_command.
   auto task_cmd_sub = node->create_subscription<std_msgs::msg::String>(
       "/task_command", 10,
-      [&load_tree](const std_msgs::msg::String::SharedPtr msg) { load_tree(msg->data); });
+      [&load_tree, &tree, &tree_loaded, &tree_done, &groot_pub, &node, &status_pub,
+       &total_leaves](const std_msgs::msg::String::SharedPtr msg) {
+        if (msg->data == "STOP") {
+          RCLCPP_WARN(node->get_logger(), "STOP received — halting tree");
+          if (tree_loaded && tree && !tree_done) {
+            tree->haltTree();
+            tree_done = true;
+            groot_pub.reset();
+            status_pub->Publish("ESTOP", "FAILURE", total_leaves, total_leaves);
+          }
+          return;
+        }
+        load_tree(msg->data);
+      });
 
   // Load initial tree if parameter set.
   auto xml_path = node->get_parameter("bt_xml_path").as_string();
