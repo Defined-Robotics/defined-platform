@@ -46,12 +46,24 @@ BT::NodeStatus CaptureImageAction::onStart() {
   getInput("save_path", save_dir_);
   getInput("timeout", timeout_sec_);
 
+  // Validate topic is not empty.
+  if (topic.empty()) {
+    RCLCPP_ERROR(node_->get_logger(), "CaptureImage: topic port is empty");
+    return BT::NodeStatus::FAILURE;
+  }
+
   image_received_ = false;
   received_image_ = nullptr;
   start_time_ = node_->now();
 
   // Create save directory if needed.
-  std::filesystem::create_directories(save_dir_);
+  try {
+    std::filesystem::create_directories(save_dir_);
+  } catch (const std::filesystem::filesystem_error& e) {
+    RCLCPP_ERROR(node_->get_logger(), "CaptureImage: cannot create save_path '%s': %s",
+                 save_dir_.c_str(), e.what());
+    return BT::NodeStatus::FAILURE;
+  }
 
   // Create report publisher (reused across ticks).
   if (!report_pub_) {
