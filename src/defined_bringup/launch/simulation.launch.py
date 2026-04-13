@@ -95,15 +95,19 @@ def generate_launch_description():
     # ---------------------------------------------------------------------------
     # Launch arguments
     # ---------------------------------------------------------------------------
+    # WORLD_NAME env var allows DockerImageTarget (defined-cli) to select the
+    # Gazebo world without passing launch arguments.  Falls back to maze_10x10.
+    world_name = os.environ.get('WORLD_NAME', 'maze_10x10')
+
     world_arg = DeclareLaunchArgument(
         'world',
-        default_value=os.path.join(pkg_gazebo, 'worlds', 'maze_10x10.sdf'),
+        default_value=os.path.join(pkg_gazebo, 'worlds', f'{world_name}.sdf'),
         description='Gz Sim world file',
     )
 
     map_arg = DeclareLaunchArgument(
         'map',
-        default_value=os.path.join(pkg_navigation, 'maps', 'maze_10x10.yaml'),
+        default_value=os.path.join(pkg_navigation, 'maps', f'{world_name}.yaml'),
         description='Nav2 map yaml file',
     )
 
