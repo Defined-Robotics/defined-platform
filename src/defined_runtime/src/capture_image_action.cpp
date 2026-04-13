@@ -16,6 +16,12 @@ CaptureImageAction::CaptureImageAction(const std::string& name,
                                        rclcpp::Node::SharedPtr node)
     : BT::StatefulActionNode(name, config), node_(node) {}
 
+/*!
+ * \brief Register BT input/output ports for the CaptureImage action.
+ *
+ * \retval BT::PortsList  Four ports: topic, save_path, timeout (input),
+ *                         file_path (output).
+ */
 BT::PortsList CaptureImageAction::providedPorts() {
   return {
       BT::InputPort<std::string>("topic", "/camera/image_raw", "Camera topic"),
@@ -25,6 +31,15 @@ BT::PortsList CaptureImageAction::providedPorts() {
   };
 }
 
+/*!
+ * \brief Subscribe to the camera topic and begin waiting for a frame.
+ *
+ * Creates the save directory if it does not exist, initialises a
+ * ``/task_reports`` publisher (reused across ticks), and subscribes
+ * to the configured image topic with SensorDataQoS.
+ *
+ * \retval BT::NodeStatus::RUNNING  Always — the actual capture happens in onRunning().
+ */
 BT::NodeStatus CaptureImageAction::onStart() {
   std::string topic;
   getInput("topic", topic);
@@ -57,6 +72,18 @@ BT::NodeStatus CaptureImageAction::onStart() {
   return BT::NodeStatus::RUNNING;
 }
 
+/*!
+ * \brief Poll for a received frame; save to disk or fail on timeout.
+ *
+ * If the timeout elapses before a frame arrives, resets the subscription
+ * and returns FAILURE.  When a frame is received, writes the raw byte
+ * data to ``<save_dir>/capture_<nanoseconds>.raw``, publishes the path
+ * on ``/task_reports``, and sets the ``file_path`` output port.
+ *
+ * \retval BT::NodeStatus::RUNNING  Still waiting for a frame.
+ * \retval BT::NodeStatus::SUCCESS  Frame captured and saved.
+ * \retval BT::NodeStatus::FAILURE  Timeout elapsed or file write error.
+ */
 BT::NodeStatus CaptureImageAction::onRunning() {
   // Check timeout.
   double elapsed = (node_->now() - start_time_).seconds();
@@ -100,6 +127,9 @@ BT::NodeStatus CaptureImageAction::onRunning() {
   return BT::NodeStatus::SUCCESS;
 }
 
+/*!
+ * \brief Clean up the image subscription when the node is halted.
+ */
 void CaptureImageAction::onHalted() {
   RCLCPP_INFO(node_->get_logger(), "CaptureImage: halted");
   image_sub_.reset();

@@ -34,13 +34,18 @@ namespace defined_runtime {
  */
 class CaptureImageAction : public BT::StatefulActionNode {
  public:
+  /*! \brief Construct with BT config and a shared ROS2 node. */
   CaptureImageAction(const std::string& name, const BT::NodeConfig& config,
                      rclcpp::Node::SharedPtr node);
 
+  /*! \brief Register BT ports: topic, save_path, timeout (input), file_path (output). */
   static BT::PortsList providedPorts();
 
+  /*! \brief Subscribe to the camera topic and start waiting for a frame. */
   BT::NodeStatus onStart() override;
+  /*! \brief Check for received frame; save to disk on arrival or fail on timeout. */
   BT::NodeStatus onRunning() override;
+  /*! \brief Cancel the subscription if the node is halted mid-capture. */
   void onHalted() override;
 
  private:
