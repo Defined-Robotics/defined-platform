@@ -1,0 +1,232 @@
+<?xml version="1.0"?>
+<!--
+  house.sdf
+  Defined Robotics, Gz Sim simulation world.
+
+  A small single storey house (10 m x 8 m) with four rooms:
+    Bedroom (top left), Living Room (top right),
+    Kitchen (bottom left), Entrance (bottom right).
+  Rooms connected by 1.0 m doorways.
+
+  Room: 10 m (X) x 8 m (Y), centred at (0, 0).
+  Walls: 0.15 m thick, 2.5 m tall.
+
+  Robot spawned separately by gazebo.launch.py via ros_gz_sim create.
+-->
+<sdf version="1.9">
+  <world name="house">
+
+    <!-- System plugins -->
+    <plugin filename="gz-sim-physics-system" name="gz::sim::v8::systems::Physics"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::v8::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::v8::systems::UserCommands"/>
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::v8::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+
+    <!-- Physics -->
+    <physics name="1ms" type="ode">
+      <real_time_update_rate>1000</real_time_update_rate>
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <ode>
+        <solver>
+          <type>quick</type>
+          <iters>150</iters>
+          <precon_iters>0</precon_iters>
+          <sor>1.4</sor>
+        </solver>
+        <constraints>
+          <cfm>1e-5</cfm>
+          <erp>0.2</erp>
+          <contact_max_correcting_vel>2000</contact_max_correcting_vel>
+          <contact_surface_layer>0.01</contact_surface_layer>
+        </constraints>
+      </ode>
+    </physics>
+
+    <!-- Scene / Lighting -->
+    <scene>
+      <ambient>0.5 0.45 0.4 1</ambient>
+      <background>0.6 0.7 0.8 1</background>
+      <shadows>false</shadows>
+    </scene>
+
+    <light name="sun" type="directional">
+      <cast_shadows>false</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.75 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <!-- Ground plane -->
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
+          <surface><friction><ode><mu>1</mu><mu2>1</mu2></ode></friction></surface>
+        </collision>
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
+          <material>
+            <ambient>0.55 0.5 0.45 1</ambient>
+            <diffuse>0.6 0.55 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         OUTER WALLS  (10 m x 8 m, 0.15 m thick, 2.5 m tall)
+         Centre at (0, 0). Extents: x=[-5, +5], y=[-4, +4]
+         ============================================================ -->
+
+    <model name="wall_north">
+      <static>true</static>
+      <pose>0 4.0 1.25 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>10.0 0.15 2.5</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>10.0 0.15 2.5</size></box></geometry>
+          <material><ambient>0.85 0.82 0.78 1</ambient><diffuse>0.9 0.87 0.83 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_south">
+      <static>true</static>
+      <pose>0 -4.0 1.25 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>10.0 0.15 2.5</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>10.0 0.15 2.5</size></box></geometry>
+          <material><ambient>0.85 0.82 0.78 1</ambient><diffuse>0.9 0.87 0.83 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_east">
+      <static>true</static>
+      <pose>5.0 0 1.25 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.15 8.3 2.5</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.15 8.3 2.5</size></box></geometry>
+          <material><ambient>0.85 0.82 0.78 1</ambient><diffuse>0.9 0.87 0.83 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_west">
+      <static>true</static>
+      <pose>-5.0 0 1.25 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.15 8.3 2.5</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.15 8.3 2.5</size></box></geometry>
+          <material><ambient>0.85 0.82 0.78 1</ambient><diffuse>0.9 0.87 0.83 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         INTERIOR WALLS
+         Central N-S wall at x=0, from y=-4 to y=+4
+         with doorways at y=+1.0 (bedroom-kitchen) and y=-1.0 (kitchen-entrance)
+         ============================================================ -->
+
+    <!-- Central wall: x=0, y from +4.0 down to +1.5 (top section) -->
+    <model name="wall_center_top">
+      <static>true</static>
+      <pose>0 2.75 1.25 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.15 2.5 2.5</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.15 2.5 2.5</size></box></geometry>
+          <material><ambient>0.85 0.82 0.78 1</ambient><diffuse>0.9 0.87 0.83 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Central wall: x=0, y from +0.5 down to -0.5 (middle section) -->
+    <model name="wall_center_mid">
+      <static>true</static>
+      <pose>0 0 1.25 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.15 1.0 2.5</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.15 1.0 2.5</size></box></geometry>
+          <material><ambient>0.85 0.82 0.78 1</ambient><diffuse>0.9 0.87 0.83 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Central wall: x=0, y from -1.5 down to -4.0 (bottom section) -->
+    <model name="wall_center_bottom">
+      <static>true</static>
+      <pose>0 -2.75 1.25 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.15 2.5 2.5</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.15 2.5 2.5</size></box></geometry>
+          <material><ambient>0.85 0.82 0.78 1</ambient><diffuse>0.9 0.87 0.83 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         E-W wall separating bedroom from kitchen (left side)
+         y=0, from x=-5 to x=-0.5 with doorway at x=-1.0
+         ============================================================ -->
+
+    <!-- Left E-W wall: western section, x from -5.0 to -1.5 -->
+    <model name="wall_left_ew_west">
+      <static>true</static>
+      <pose>-3.25 0 1.25 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>3.5 0.15 2.5</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>3.5 0.15 2.5</size></box></geometry>
+          <material><ambient>0.85 0.82 0.78 1</ambient><diffuse>0.9 0.87 0.83 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Left E-W wall: eastern stub, x from -0.5 to 0.0 -->
+    <model name="wall_left_ew_east">
+      <static>true</static>
+      <pose>-0.25 0 1.25 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.5 0.15 2.5</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.5 0.15 2.5</size></box></geometry>
+          <material><ambient>0.85 0.82 0.78 1</ambient><diffuse>0.9 0.87 0.83 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         E-W wall separating living room from entrance (right side)
+         y=-1.0, from x=0.5 to x=5.0 with doorway at x=+2.0
+         ============================================================ -->
+
+    <!-- Right E-W wall: western section, x from 0.0 to +1.5 -->
+    <model name="wall_right_ew_west">
+      <static>true</static>
+      <pose>0.75 -1.0 1.25 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>1.5 0.15 2.5</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>1.5 0.15 2.5</size></box></geometry>
+          <material><ambient>0.85 0.82 0.78 1</ambient><diffuse>0.9 0.87 0.83 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Right E-W wall: eastern section, x from +2.5 to +5.0 -->
+    <model name="wall_right_ew_east">
+      <static>true</static>
+      <pose>3.75 -1.0 1.25 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>2.5 0.15 2.5</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>2.5 0.15 2.5</size></box></geometry>
+          <material><ambient>0.85 0.82 0.78 1</ambient><diffuse>0.9 0.87 0.83 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>
