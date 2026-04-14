@@ -63,12 +63,29 @@ def generate_launch_description():
         description='ROS2 node namespace',
     )
 
+    max_linear_vel_arg = DeclareLaunchArgument(
+        'max_linear_vel',
+        default_value='0.22',
+        description='Robot max linear velocity (m/s) from RDF',
+    )
+
+    max_angular_vel_arg = DeclareLaunchArgument(
+        'max_angular_vel',
+        default_value='2.84',
+        description='Robot max angular velocity (rad/s) from RDF',
+    )
+
     # -----------------------------------------------------------------------
     # RewrittenYaml for Nav2 params (controller, planner, costmaps)
+    # Robot velocity params override hardcoded nav2_params.yaml values.
     # -----------------------------------------------------------------------
     param_substitutions = {
         'use_sim_time': LaunchConfiguration('use_sim_time'),
         'autostart':    LaunchConfiguration('autostart'),
+        'FollowPath.max_vel_x':     LaunchConfiguration('max_linear_vel'),
+        'FollowPath.max_speed_xy':  LaunchConfiguration('max_linear_vel'),
+        'FollowPath.max_vel_theta': LaunchConfiguration('max_angular_vel'),
+        'max_rotational_vel':       LaunchConfiguration('max_angular_vel'),
     }
 
     configured_params = RewrittenYaml(
@@ -212,6 +229,8 @@ def generate_launch_description():
         use_sim_time_arg,
         autostart_arg,
         namespace_arg,
+        max_linear_vel_arg,
+        max_angular_vel_arg,
         set_sim_time,
         # SLAM (replaces map_server + amcl)
         slam_toolbox,

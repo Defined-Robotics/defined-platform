@@ -74,6 +74,19 @@ def generate_launch_description():
     z_arg   = DeclareLaunchArgument('z',   default_value='0.05', description='Spawn Z (m) — slightly above ground to avoid collision on spawn')
     yaw_arg = DeclareLaunchArgument('yaw', default_value='0.0',  description='Spawn yaw (rad)')
 
+    # Robot capability args — forwarded from simulation.launch.py (ROBOT_* env vars)
+    wheel_separation_arg  = DeclareLaunchArgument('wheel_separation',  default_value='0.287')
+    wheel_radius_arg      = DeclareLaunchArgument('wheel_radius',      default_value='0.033')
+    has_lidar_arg         = DeclareLaunchArgument('has_lidar',         default_value='true')
+    lidar_range_min_arg   = DeclareLaunchArgument('lidar_range_min',   default_value='0.20')
+    lidar_range_max_arg   = DeclareLaunchArgument('lidar_range_max',   default_value='3.5')
+    lidar_samples_arg     = DeclareLaunchArgument('lidar_samples',     default_value='720')
+    lidar_update_rate_arg = DeclareLaunchArgument('lidar_update_rate', default_value='20')
+    has_camera_arg        = DeclareLaunchArgument('has_camera',        default_value='false')
+    camera_width_arg      = DeclareLaunchArgument('camera_width',      default_value='640')
+    camera_height_arg     = DeclareLaunchArgument('camera_height',     default_value='480')
+    camera_fps_arg        = DeclareLaunchArgument('camera_fps',        default_value='30')
+
     # ---------------------------------------------------------------------------
     # Gz Sim — physics engine + scene broadcaster
     # Uses ros_gz_sim's gz_sim.launch.py which wraps the `gz sim` command.
@@ -102,7 +115,18 @@ def generate_launch_description():
             os.path.join(pkg_description, 'launch', 'robot_state_publisher.launch.py')
         ),
         launch_arguments={
-            'use_sim_time': LaunchConfiguration('use_sim_time'),
+            'use_sim_time':     LaunchConfiguration('use_sim_time'),
+            'wheel_separation': LaunchConfiguration('wheel_separation'),
+            'wheel_radius':     LaunchConfiguration('wheel_radius'),
+            'has_lidar':        LaunchConfiguration('has_lidar'),
+            'lidar_range_min':  LaunchConfiguration('lidar_range_min'),
+            'lidar_range_max':  LaunchConfiguration('lidar_range_max'),
+            'lidar_samples':    LaunchConfiguration('lidar_samples'),
+            'lidar_update_rate': LaunchConfiguration('lidar_update_rate'),
+            'has_camera':       LaunchConfiguration('has_camera'),
+            'camera_width':     LaunchConfiguration('camera_width'),
+            'camera_height':    LaunchConfiguration('camera_height'),
+            'camera_fps':       LaunchConfiguration('camera_fps'),
         }.items(),
     )
 
@@ -160,6 +184,19 @@ def generate_launch_description():
         y_arg,
         z_arg,
         yaw_arg,
+        # Robot capability args
+        wheel_separation_arg,
+        wheel_radius_arg,
+        has_lidar_arg,
+        lidar_range_min_arg,
+        lidar_range_max_arg,
+        lidar_samples_arg,
+        lidar_update_rate_arg,
+        has_camera_arg,
+        camera_width_arg,
+        camera_height_arg,
+        camera_fps_arg,
+        # Stages
         gz_sim,
         robot_state_publisher,
         spawn_robot,

@@ -98,15 +98,32 @@ def generate_launch_description():
         description='ROS2 node namespace (empty = global)',
     )
 
+    max_linear_vel_arg = DeclareLaunchArgument(
+        'max_linear_vel',
+        default_value='0.22',
+        description='Robot max linear velocity (m/s) from RDF',
+    )
+
+    max_angular_vel_arg = DeclareLaunchArgument(
+        'max_angular_vel',
+        default_value='2.84',
+        description='Robot max angular velocity (rad/s) from RDF',
+    )
+
     # ---------------------------------------------------------------------------
     # RewrittenYaml — injects the resolved map path and sim time flag into the
     # params file at launch time, so the YAML itself does not hard-code paths.
+    # Robot velocity params override hardcoded nav2_params.yaml values.
     # From nav2_common (ros-jazzy-nav2-common package).
     # ---------------------------------------------------------------------------
     param_substitutions = {
-        'use_sim_time':  LaunchConfiguration('use_sim_time'),
-        'yaml_filename': LaunchConfiguration('map'),
-        'autostart':     LaunchConfiguration('autostart'),
+        'use_sim_time':             LaunchConfiguration('use_sim_time'),
+        'yaml_filename':            LaunchConfiguration('map'),
+        'autostart':                LaunchConfiguration('autostart'),
+        'FollowPath.max_vel_x':     LaunchConfiguration('max_linear_vel'),
+        'FollowPath.max_speed_xy':  LaunchConfiguration('max_linear_vel'),
+        'FollowPath.max_vel_theta': LaunchConfiguration('max_angular_vel'),
+        'max_rotational_vel':       LaunchConfiguration('max_angular_vel'),
     }
 
     configured_params = RewrittenYaml(
@@ -250,6 +267,8 @@ def generate_launch_description():
         use_sim_time_arg,
         autostart_arg,
         namespace_arg,
+        max_linear_vel_arg,
+        max_angular_vel_arg,
         # Global param
         set_sim_time,
         # Nav2 nodes (AMCL provides map→odom TF using LiDAR /scan data)
