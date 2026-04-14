@@ -1,0 +1,14 @@
+# warehouse.yaml
+# Map metadata for nav2 map_server.
+#
+# Warehouse: 16.0 m x 10.0 m, centred at (0,0).
+# Six shelf rows (3 upper at y=+2, 3 lower at y=-2).
+# Origin: bottom-left corner of the image in the map frame.
+# 320x200 image at 0.05 m/px, bottom-left at (-8,-5).
+
+image: warehouse.pgm
+resolution: 0.05
+origin: [-8.0, -5.0, 0.0]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.25

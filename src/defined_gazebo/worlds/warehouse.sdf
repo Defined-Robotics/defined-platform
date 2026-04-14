@@ -1,0 +1,214 @@
+<?xml version="1.0"?>
+<!--
+  warehouse.sdf
+  Defined Robotics, Gz Sim simulation world.
+
+  A 16 m x 10 m warehouse with three parallel aisles.
+  Two rows of shelves (upper at y=+2, lower at y=-2), three shelves each.
+  Aisles ~2.0 m wide between shelf rows.
+
+  Room: 16 m (X) x 10 m (Y), centred at (0, 0).
+  Shelves: 4.0 m long, 0.4 m wide, 2.0 m tall.
+
+  Robot spawned separately by gazebo.launch.py via ros_gz_sim create.
+-->
+<sdf version="1.9">
+  <world name="warehouse">
+
+    <!-- System plugins -->
+    <plugin filename="gz-sim-physics-system" name="gz::sim::v8::systems::Physics"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::v8::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::v8::systems::UserCommands"/>
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::v8::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+
+    <!-- Physics -->
+    <physics name="1ms" type="ode">
+      <real_time_update_rate>1000</real_time_update_rate>
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <ode>
+        <solver>
+          <type>quick</type>
+          <iters>150</iters>
+          <precon_iters>0</precon_iters>
+          <sor>1.4</sor>
+        </solver>
+        <constraints>
+          <cfm>1e-5</cfm>
+          <erp>0.2</erp>
+          <contact_max_correcting_vel>2000</contact_max_correcting_vel>
+          <contact_surface_layer>0.01</contact_surface_layer>
+        </constraints>
+      </ode>
+    </physics>
+
+    <!-- Scene / Lighting -->
+    <scene>
+      <ambient>0.3 0.3 0.35 1</ambient>
+      <background>0.2 0.2 0.25 1</background>
+      <shadows>false</shadows>
+    </scene>
+
+    <light name="ceiling_1" type="directional">
+      <cast_shadows>false</cast_shadows>
+      <pose>-3 0 8 0 0 0</pose>
+      <diffuse>0.9 0.9 0.85 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <direction>0 0 -1</direction>
+    </light>
+
+    <light name="ceiling_2" type="directional">
+      <cast_shadows>false</cast_shadows>
+      <pose>3 0 8 0 0 0</pose>
+      <diffuse>0.9 0.9 0.85 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <direction>0 0 -1</direction>
+    </light>
+
+    <!-- Ground plane -->
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
+          <surface><friction><ode><mu>1</mu><mu2>1</mu2></ode></friction></surface>
+        </collision>
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
+          <material>
+            <ambient>0.4 0.4 0.4 1</ambient>
+            <diffuse>0.45 0.45 0.45 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         OUTER WALLS  (16 m x 10 m, 0.20 m thick, 2.0 m tall)
+         ============================================================ -->
+
+    <model name="wall_north">
+      <static>true</static>
+      <pose>0 5.0 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>16.0 0.2 2.0</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>16.0 0.2 2.0</size></box></geometry>
+          <material><ambient>0.7 0.7 0.7 1</ambient><diffuse>0.7 0.7 0.7 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_south">
+      <static>true</static>
+      <pose>0 -5.0 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>16.0 0.2 2.0</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>16.0 0.2 2.0</size></box></geometry>
+          <material><ambient>0.7 0.7 0.7 1</ambient><diffuse>0.7 0.7 0.7 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_east">
+      <static>true</static>
+      <pose>8.0 0 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.2 10.4 2.0</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.2 10.4 2.0</size></box></geometry>
+          <material><ambient>0.7 0.7 0.7 1</ambient><diffuse>0.7 0.7 0.7 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_west">
+      <static>true</static>
+      <pose>-8.0 0 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.2 10.4 2.0</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.2 10.4 2.0</size></box></geometry>
+          <material><ambient>0.7 0.7 0.7 1</ambient><diffuse>0.7 0.7 0.7 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         SHELF ROWS — Upper row (y = +2.0)
+         Three shelves at x = -4.0, 0.0, +4.0
+         Each: 4.0 m long (X), 0.4 m deep (Y), 2.0 m tall
+         ============================================================ -->
+
+    <model name="shelf_a">
+      <static>true</static>
+      <pose>-4.0 2.0 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>4.0 0.4 2.0</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>4.0 0.4 2.0</size></box></geometry>
+          <material><ambient>0.4 0.3 0.2 1</ambient><diffuse>0.5 0.35 0.2 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="shelf_b">
+      <static>true</static>
+      <pose>0.0 2.0 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>4.0 0.4 2.0</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>4.0 0.4 2.0</size></box></geometry>
+          <material><ambient>0.4 0.3 0.2 1</ambient><diffuse>0.5 0.35 0.2 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="shelf_c">
+      <static>true</static>
+      <pose>4.0 2.0 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>4.0 0.4 2.0</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>4.0 0.4 2.0</size></box></geometry>
+          <material><ambient>0.4 0.3 0.2 1</ambient><diffuse>0.5 0.35 0.2 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         SHELF ROWS — Lower row (y = -2.0)
+         ============================================================ -->
+
+    <model name="shelf_d">
+      <static>true</static>
+      <pose>-4.0 -2.0 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>4.0 0.4 2.0</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>4.0 0.4 2.0</size></box></geometry>
+          <material><ambient>0.4 0.3 0.2 1</ambient><diffuse>0.5 0.35 0.2 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="shelf_e">
+      <static>true</static>
+      <pose>0.0 -2.0 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>4.0 0.4 2.0</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>4.0 0.4 2.0</size></box></geometry>
+          <material><ambient>0.4 0.3 0.2 1</ambient><diffuse>0.5 0.35 0.2 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="shelf_f">
+      <static>true</static>
+      <pose>4.0 -2.0 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>4.0 0.4 2.0</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>4.0 0.4 2.0</size></box></geometry>
+          <material><ambient>0.4 0.3 0.2 1</ambient><diffuse>0.5 0.35 0.2 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>

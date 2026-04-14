@@ -95,15 +95,38 @@ def generate_launch_description():
     # ---------------------------------------------------------------------------
     # Launch arguments
     # ---------------------------------------------------------------------------
+    # WORLD_NAME env var allows DockerImageTarget (defined-cli) to select the
+    # Gazebo world without passing launch arguments.  Falls back to maze_10x10.
+    # Use `or` instead of the get() default so that WORLD_NAME="" is treated
+    # as unset (empty strings produce invalid paths like .../worlds/.sdf).
+    world_name = os.environ.get('WORLD_NAME') or 'maze_10x10'
+
+    # ROBOT_* env vars — set by DockerImageTarget from RobotConfig (DR-022 Phase 1).
+    # These drive parametric xacro (sensor conditionals) and Nav2 param overrides.
+    # All use `or` fallback so empty strings are treated as unset.
+    robot_wheel_separation  = os.environ.get('ROBOT_WHEEL_SEPARATION') or '0.287'
+    robot_wheel_radius      = os.environ.get('ROBOT_WHEEL_RADIUS') or '0.033'
+    robot_max_linear_vel    = os.environ.get('ROBOT_MAX_LINEAR_VEL') or '0.22'
+    robot_max_angular_vel   = os.environ.get('ROBOT_MAX_ANGULAR_VEL') or '2.84'
+    robot_has_lidar         = os.environ.get('ROBOT_HAS_LIDAR') or 'true'
+    robot_lidar_range_min   = os.environ.get('ROBOT_LIDAR_RANGE_MIN') or '0.20'
+    robot_lidar_range_max   = os.environ.get('ROBOT_LIDAR_RANGE_MAX') or '3.5'
+    robot_lidar_samples     = os.environ.get('ROBOT_LIDAR_SAMPLES') or '720'
+    robot_lidar_update_rate = os.environ.get('ROBOT_LIDAR_UPDATE_RATE') or '20'
+    robot_has_camera        = os.environ.get('ROBOT_HAS_CAMERA') or 'false'
+    robot_camera_width      = os.environ.get('ROBOT_CAMERA_WIDTH') or '640'
+    robot_camera_height     = os.environ.get('ROBOT_CAMERA_HEIGHT') or '480'
+    robot_camera_fps        = os.environ.get('ROBOT_CAMERA_FPS') or '30'
+
     world_arg = DeclareLaunchArgument(
         'world',
-        default_value=os.path.join(pkg_gazebo, 'worlds', 'maze_10x10.sdf'),
+        default_value=os.path.join(pkg_gazebo, 'worlds', f'{world_name}.sdf'),
         description='Gz Sim world file',
     )
 
     map_arg = DeclareLaunchArgument(
         'map',
-        default_value=os.path.join(pkg_navigation, 'maps', 'maze_10x10.yaml'),
+        default_value=os.path.join(pkg_navigation, 'maps', f'{world_name}.yaml'),
         description='Nav2 map yaml file',
     )
 
@@ -152,13 +175,24 @@ def generate_launch_description():
             os.path.join(pkg_gazebo, 'launch', 'gazebo.launch.py')
         ),
         launch_arguments={
-            'world':        LaunchConfiguration('world'),
-            'use_gui':      LaunchConfiguration('use_gui'),
-            'use_sim_time': LaunchConfiguration('use_sim_time'),
-            'x':            LaunchConfiguration('x'),
-            'y':            LaunchConfiguration('y'),
-            'z':            LaunchConfiguration('z'),
-            'yaw':          LaunchConfiguration('yaw'),
+            'world':              LaunchConfiguration('world'),
+            'use_gui':            LaunchConfiguration('use_gui'),
+            'use_sim_time':       LaunchConfiguration('use_sim_time'),
+            'x':                  LaunchConfiguration('x'),
+            'y':                  LaunchConfiguration('y'),
+            'z':                  LaunchConfiguration('z'),
+            'yaw':                LaunchConfiguration('yaw'),
+            'wheel_separation':   robot_wheel_separation,
+            'wheel_radius':       robot_wheel_radius,
+            'has_lidar':          robot_has_lidar,
+            'lidar_range_min':    robot_lidar_range_min,
+            'lidar_range_max':    robot_lidar_range_max,
+            'lidar_samples':      robot_lidar_samples,
+            'lidar_update_rate':  robot_lidar_update_rate,
+            'has_camera':         robot_has_camera,
+            'camera_width':       robot_camera_width,
+            'camera_height':      robot_camera_height,
+            'camera_fps':         robot_camera_fps,
         }.items(),
     )
 
@@ -182,10 +216,12 @@ def generate_launch_description():
                     )
                 ),
                 launch_arguments={
-                    'map':          LaunchConfiguration('map'),
-                    'params_file':  LaunchConfiguration('params_file'),
-                    'use_sim_time': LaunchConfiguration('use_sim_time'),
-                    'autostart':    LaunchConfiguration('autostart'),
+                    'map':              LaunchConfiguration('map'),
+                    'params_file':      LaunchConfiguration('params_file'),
+                    'use_sim_time':     LaunchConfiguration('use_sim_time'),
+                    'autostart':        LaunchConfiguration('autostart'),
+                    'max_linear_vel':   robot_max_linear_vel,
+                    'max_angular_vel':  robot_max_angular_vel,
                 }.items(),
                 condition=UnlessCondition(LaunchConfiguration('use_slam')),
             )
@@ -204,9 +240,11 @@ def generate_launch_description():
                     )
                 ),
                 launch_arguments={
-                    'params_file':  LaunchConfiguration('params_file'),
-                    'use_sim_time': LaunchConfiguration('use_sim_time'),
-                    'autostart':    LaunchConfiguration('autostart'),
+                    'params_file':      LaunchConfiguration('params_file'),
+                    'use_sim_time':     LaunchConfiguration('use_sim_time'),
+                    'autostart':        LaunchConfiguration('autostart'),
+                    'max_linear_vel':   robot_max_linear_vel,
+                    'max_angular_vel':  robot_max_angular_vel,
                 }.items(),
                 condition=IfCondition(LaunchConfiguration('use_slam')),
             )

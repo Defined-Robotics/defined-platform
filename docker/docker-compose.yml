@@ -32,7 +32,6 @@ services:
   # Runs: Gz Sim (headless) + Nav2 + rosbridge WebSocket
   # ---------------------------------------------------------------------------
   sim:
-    platform: linux/arm64
     build:
       context: ..                          # build context = work/defined_platform/
       dockerfile: docker/Dockerfile.ros2
@@ -89,7 +88,6 @@ services:
   # Start with: docker compose --profile viz up rviz
   # ---------------------------------------------------------------------------
   rviz:
-    platform: linux/arm64
     build:
       context: ..
       dockerfile: docker/Dockerfile.ros2
@@ -123,7 +121,6 @@ services:
   # On macOS: DISPLAY=host.docker.internal:1 docker compose --profile gui up sim-gui
   # ---------------------------------------------------------------------------
   sim-gui:
-    platform: linux/arm64
     build:
       context: ..
       dockerfile: docker/Dockerfile.ros2
@@ -168,7 +165,6 @@ services:
   # Then run patrol: docker exec defined_tb3 python3 /slam_tools/slam_patrol.py --world room
   # ---------------------------------------------------------------------------
   tb3:
-    platform: linux/arm64
     build:
       context: ..
       dockerfile: docker/Dockerfile.ros2

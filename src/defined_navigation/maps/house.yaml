@@ -1,0 +1,15 @@
+# house.yaml
+# Map metadata for nav2 map_server.
+#
+# House: 10.0 m x 8.0 m, centred at (0,0).
+# Four rooms: bedroom (top-left), living room (top-right),
+#              kitchen (bottom-left), entrance (bottom-right).
+# Origin: bottom-left corner of the image in the map frame.
+# 200x160 image at 0.05 m/px, bottom-left at (-5,-4).
+
+image: house.pgm
+resolution: 0.05
+origin: [-5.0, -4.0, 0.0]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.25
