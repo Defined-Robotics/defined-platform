@@ -97,23 +97,26 @@ def generate_launch_description():
     # ---------------------------------------------------------------------------
     # WORLD_NAME env var allows DockerImageTarget (defined-cli) to select the
     # Gazebo world without passing launch arguments.  Falls back to maze_10x10.
-    world_name = os.environ.get('WORLD_NAME', 'maze_10x10')
+    # Use `or` instead of the get() default so that WORLD_NAME="" is treated
+    # as unset (empty strings produce invalid paths like .../worlds/.sdf).
+    world_name = os.environ.get('WORLD_NAME') or 'maze_10x10'
 
     # ROBOT_* env vars — set by DockerImageTarget from RobotConfig (DR-022 Phase 1).
     # These drive parametric xacro (sensor conditionals) and Nav2 param overrides.
-    robot_wheel_separation = os.environ.get('ROBOT_WHEEL_SEPARATION', '0.287')
-    robot_wheel_radius     = os.environ.get('ROBOT_WHEEL_RADIUS', '0.033')
-    robot_max_linear_vel   = os.environ.get('ROBOT_MAX_LINEAR_VEL', '0.22')
-    robot_max_angular_vel  = os.environ.get('ROBOT_MAX_ANGULAR_VEL', '2.84')
-    robot_has_lidar        = os.environ.get('ROBOT_HAS_LIDAR', 'true')
-    robot_lidar_range_min  = os.environ.get('ROBOT_LIDAR_RANGE_MIN', '0.20')
-    robot_lidar_range_max  = os.environ.get('ROBOT_LIDAR_RANGE_MAX', '3.5')
-    robot_lidar_samples    = os.environ.get('ROBOT_LIDAR_SAMPLES', '720')
-    robot_lidar_update_rate = os.environ.get('ROBOT_LIDAR_UPDATE_RATE', '20')
-    robot_has_camera       = os.environ.get('ROBOT_HAS_CAMERA', 'false')
-    robot_camera_width     = os.environ.get('ROBOT_CAMERA_WIDTH', '640')
-    robot_camera_height    = os.environ.get('ROBOT_CAMERA_HEIGHT', '480')
-    robot_camera_fps       = os.environ.get('ROBOT_CAMERA_FPS', '30')
+    # All use `or` fallback so empty strings are treated as unset.
+    robot_wheel_separation  = os.environ.get('ROBOT_WHEEL_SEPARATION') or '0.287'
+    robot_wheel_radius      = os.environ.get('ROBOT_WHEEL_RADIUS') or '0.033'
+    robot_max_linear_vel    = os.environ.get('ROBOT_MAX_LINEAR_VEL') or '0.22'
+    robot_max_angular_vel   = os.environ.get('ROBOT_MAX_ANGULAR_VEL') or '2.84'
+    robot_has_lidar         = os.environ.get('ROBOT_HAS_LIDAR') or 'true'
+    robot_lidar_range_min   = os.environ.get('ROBOT_LIDAR_RANGE_MIN') or '0.20'
+    robot_lidar_range_max   = os.environ.get('ROBOT_LIDAR_RANGE_MAX') or '3.5'
+    robot_lidar_samples     = os.environ.get('ROBOT_LIDAR_SAMPLES') or '720'
+    robot_lidar_update_rate = os.environ.get('ROBOT_LIDAR_UPDATE_RATE') or '20'
+    robot_has_camera        = os.environ.get('ROBOT_HAS_CAMERA') or 'false'
+    robot_camera_width      = os.environ.get('ROBOT_CAMERA_WIDTH') or '640'
+    robot_camera_height     = os.environ.get('ROBOT_CAMERA_HEIGHT') or '480'
+    robot_camera_fps        = os.environ.get('ROBOT_CAMERA_FPS') or '30'
 
     world_arg = DeclareLaunchArgument(
         'world',
