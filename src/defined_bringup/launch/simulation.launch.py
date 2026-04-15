@@ -114,9 +114,17 @@ def generate_launch_description():
     robot_lidar_samples     = os.environ.get('ROBOT_LIDAR_SAMPLES') or '720'
     robot_lidar_update_rate = os.environ.get('ROBOT_LIDAR_UPDATE_RATE') or '20'
     robot_has_camera        = os.environ.get('ROBOT_HAS_CAMERA') or 'false'
-    robot_camera_width      = os.environ.get('ROBOT_CAMERA_WIDTH') or '640'
-    robot_camera_height     = os.environ.get('ROBOT_CAMERA_HEIGHT') or '480'
-    robot_camera_fps        = os.environ.get('ROBOT_CAMERA_FPS') or '30'
+    # Cap camera resolution and FPS in sim to avoid starving the ogre2 renderer
+    # which is shared with gpu_lidar.  The RDF spec values are for the real
+    # robot; sim only needs occasional frames for CaptureImage.  On ARM Mac
+    # (amd64 emulation, software rendering) even modest camera rates can starve
+    # the lidar pipeline and break SLAM.
+    _cam_w   = int(os.environ.get('ROBOT_CAMERA_WIDTH') or '640')
+    _cam_h   = int(os.environ.get('ROBOT_CAMERA_HEIGHT') or '480')
+    _cam_fps = int(float(os.environ.get('ROBOT_CAMERA_FPS') or '30'))
+    robot_camera_width      = str(min(_cam_w, 160))
+    robot_camera_height     = str(min(_cam_h, 120))
+    robot_camera_fps        = str(min(_cam_fps, 2))
 
     world_arg = DeclareLaunchArgument(
         'world',
