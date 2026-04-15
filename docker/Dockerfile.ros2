@@ -19,7 +19,9 @@ FROM osrf/ros:jazzy-desktop-full
 #   ros-jazzy-tf2-tools          : tf2_echo, view_frames diagnostic utilities
 #   ros-jazzy-rviz2              : RViz2 visualiser (for the viz Docker profile)
 #   python3-colcon-common-extensions : colcon build tool
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Upgrade base-image packages first so that libraries like fastcdr
+# match the ABI expected by newer Nav2/rosbridge releases.
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
     ros-jazzy-navigation2 \
     ros-jazzy-nav2-bringup \
     ros-jazzy-slam-toolbox \
