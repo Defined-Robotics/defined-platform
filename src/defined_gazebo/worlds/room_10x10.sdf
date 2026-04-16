@@ -197,5 +197,106 @@
       </link>
     </model>
 
+    <!-- ============================================================
+         FURNITURE — obstacles for navigation testing
+         All placed with >=1.0 m clearance from walls and each other
+         ============================================================ -->
+
+    <!-- Table (northeast quadrant): 1.2 m x 0.7 m top, 0.75 m tall -->
+    <model name="table">
+      <static>true</static>
+      <pose>2.5 2.5 0.375 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>1.2 0.7 0.75</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>1.2 0.7 0.75</size></box></geometry>
+          <material><ambient>0.45 0.3 0.18 1</ambient><diffuse>0.55 0.38 0.22 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Chair at table: 0.45 m x 0.45 m x 0.85 m -->
+    <model name="chair_1">
+      <static>true</static>
+      <pose>2.5 1.5 0.425 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.45 0.45 0.85</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.45 0.45 0.85</size></box></geometry>
+          <material><ambient>0.3 0.2 0.12 1</ambient><diffuse>0.4 0.28 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Second chair opposite side -->
+    <model name="chair_2">
+      <static>true</static>
+      <pose>2.5 3.5 0.425 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.45 0.45 0.85</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.45 0.45 0.85</size></box></geometry>
+          <material><ambient>0.3 0.2 0.12 1</ambient><diffuse>0.4 0.28 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Bookshelf against north wall (northwest): 1.0 m x 0.35 m x 1.5 m -->
+    <model name="bookshelf">
+      <static>true</static>
+      <pose>-3.0 4.3 0.75 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>1.0 0.35 1.5</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>1.0 0.35 1.5</size></box></geometry>
+          <material><ambient>0.35 0.22 0.1 1</ambient><diffuse>0.42 0.28 0.14 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Cabinet against west wall: 0.5 m x 0.9 m x 1.0 m -->
+    <model name="cabinet">
+      <static>true</static>
+      <pose>-4.3 -1.0 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.5 0.9 1.0</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.5 0.9 1.0</size></box></geometry>
+          <material><ambient>0.6 0.6 0.6 1</ambient><diffuse>0.65 0.65 0.65 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Sofa (southwest quadrant): 1.8 m x 0.7 m x 0.65 m -->
+    <model name="sofa">
+      <static>true</static>
+      <pose>-2.0 -3.5 0.325 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>1.8 0.7 0.65</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>1.8 0.7 0.65</size></box></geometry>
+          <material><ambient>0.25 0.3 0.45 1</ambient><diffuse>0.3 0.35 0.5 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Coffee table in front of sofa: 0.9 m x 0.5 m x 0.4 m -->
+    <model name="coffee_table">
+      <static>true</static>
+      <pose>-2.0 -2.3 0.2 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.9 0.5 0.4</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.9 0.5 0.4</size></box></geometry>
+          <material><ambient>0.45 0.3 0.18 1</ambient><diffuse>0.55 0.38 0.22 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Small side table (southeast): 0.4 m x 0.4 m x 0.55 m -->
+    <model name="side_table">
+      <static>true</static>
+      <pose>3.5 -3.5 0.275 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.4 0.4 0.55</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.4 0.4 0.55</size></box></geometry>
+          <material><ambient>0.45 0.3 0.18 1</ambient><diffuse>0.55 0.38 0.22 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
   </world>
 </sdf>
