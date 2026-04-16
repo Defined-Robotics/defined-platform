@@ -210,5 +210,118 @@
       </link>
     </model>
 
+    <!-- ============================================================
+         PALLETS — 1.2 m x 0.8 m x 0.15 m (standard EUR pallet)
+         Placed in aisles / staging areas with robot clearance
+         ============================================================ -->
+
+    <!-- Pallet near loading dock (southwest) -->
+    <model name="pallet_1">
+      <static>true</static>
+      <pose>-6.0 -1.5 0.075 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>1.2 0.8 0.15</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>1.2 0.8 0.15</size></box></geometry>
+          <material><ambient>0.6 0.45 0.25 1</ambient><diffuse>0.65 0.5 0.3 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Pallet with stacked crate (centre aisle) -->
+    <model name="pallet_2">
+      <static>true</static>
+      <pose>0.0 -4.0 0.075 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>1.2 0.8 0.15</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>1.2 0.8 0.15</size></box></geometry>
+          <material><ambient>0.6 0.45 0.25 1</ambient><diffuse>0.65 0.5 0.3 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="crate_on_pallet_2">
+      <static>true</static>
+      <pose>0.0 -4.0 0.45 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.6 0.6 0.6</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.6 0.6 0.6</size></box></geometry>
+          <material><ambient>0.35 0.25 0.15 1</ambient><diffuse>0.45 0.3 0.18 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Pallet in staging area (east side) -->
+    <model name="pallet_3">
+      <static>true</static>
+      <pose>5.5 3.5 0.075 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>1.2 0.8 0.15</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>1.2 0.8 0.15</size></box></geometry>
+          <material><ambient>0.6 0.45 0.25 1</ambient><diffuse>0.65 0.5 0.3 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Pallet near north wall -->
+    <model name="pallet_4">
+      <static>true</static>
+      <pose>3.0 4.2 0.075 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.8 1.2 0.15</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.8 1.2 0.15</size></box></geometry>
+          <material><ambient>0.6 0.45 0.25 1</ambient><diffuse>0.65 0.5 0.3 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================================
+         CRATES — loose boxes in the warehouse
+         ============================================================ -->
+
+    <!-- Small crate near shelf_a -->
+    <model name="crate_1">
+      <static>true</static>
+      <pose>-5.5 0.0 0.25 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.5 0.5 0.5</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.5 0.5 0.5</size></box></geometry>
+          <material><ambient>0.35 0.25 0.15 1</ambient><diffuse>0.45 0.3 0.18 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Tall crate near east wall -->
+    <model name="crate_2">
+      <static>true</static>
+      <pose>6.5 -3.0 0.4 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.6 0.6 0.8</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.6 0.6 0.8</size></box></geometry>
+          <material><ambient>0.3 0.3 0.35 1</ambient><diffuse>0.35 0.35 0.4 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Stack of two flat crates near staging -->
+    <model name="crate_3_bottom">
+      <static>true</static>
+      <pose>6.0 1.0 0.15 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.8 0.5 0.3</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.8 0.5 0.3</size></box></geometry>
+          <material><ambient>0.35 0.25 0.15 1</ambient><diffuse>0.45 0.3 0.18 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="crate_3_top">
+      <static>true</static>
+      <pose>6.0 1.0 0.45 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.8 0.5 0.3</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.8 0.5 0.3</size></box></geometry>
+          <material><ambient>0.4 0.28 0.16 1</ambient><diffuse>0.5 0.35 0.2 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
   </world>
 </sdf>
